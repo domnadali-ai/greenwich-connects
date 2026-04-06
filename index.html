@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Greenwich Connects</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  .card {
+    width: 100%;
+    max-width: 480px;
+    background: #fff;
+    border-radius: 24px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 92vh;
+    max-height: 780px;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.5);
+  }
+  .header {
+    background: linear-gradient(135deg, #1b4332, #2d6a4f);
+    padding: 18px 20px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .avatar {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+  }
+  .header-text { flex: 1; }
+  .header-name { color: #fff; font-weight: 700; font-size: 16px; }
+  .header-sub { color: rgba(255,255,255,0.65); font-size: 12px; margin-top: 1px; }
+  .header-btns { display: flex; gap: 8px; }
+  .btn-outline {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 16px;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 5px 11px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .btn-solid {
+    background: rgba(255,255,255,0.9);
+    border: none;
+    border-radius: 16px;
+    color: #1b4332;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 5px 11px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .categories {
+    display: none;
+    background: #f0faf4;
+    padding: 14px 16px;
+    border-bottom: 1px solid #d8f3dc;
+  }
+  .categories.open { display: block; }
+  .cat-label { font-size: 11px; color: #555; font-weight: 600; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .cat-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+  .cat-pill {
+    background: #fff;
+    border: 1.5px solid #b7e4c7;
+    border-radius: 20px;
+    padding: 6px 13px;
+    font-size: 12.5px;
+    color: #1b4332;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 18px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: #f8faf9;
+  }
+  .msg { display: flex; align-items: flex-end; gap: 8px; }
+  .msg.user { justify-content: flex-end; }
+  .msg-avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1b4332, #74c69d);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; flex-shrink: 0;
+  }
+  .bubble {
+    max-width: 78%;
+    padding: 11px 15px;
+    font-size: 14.5px;
+    line-height: 1.55;
+    white-space: pre-wrap;
+  }
+  .bubble.agent {
+    background: #fff;
+    color: #1a1a2e;
+    border-radius: 18px 18px 18px 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  }
+  .bubble.user {
+    background: linear-gradient(135deg, #1b4332, #2d6a4f);
+    color: #fff;
+    border-radius: 18px 18px 4px 18px;
+    box-shadow: 0 2px 8px rgba(27,67,50,0.3);
+  }
+  .typing-bubble {
+    background: #fff;
+    border-radius: 18px 18px 18px 4px;
+    padding: 12px 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    display: flex;
+    gap: 5px;
+    align-items: center;
+  }
+  .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #2d6a4f;
+    animation: bounce 1.2s ease-in-out infinite;
+  }
+  .dot:nth-child(2) { animation-delay: 0.2s; }
+  .dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); opacity: 0.4; }
+    50% { transform: translateY(-4px); opacity: 1; }
+  }
+  .quick-replies {
+    padding: 8px 14px 4px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    background: #f8faf9;
+  }
+  .qr-btn {
+    background: #fff;
+    border: 1.5px solid #b7e4c7;
+    border-radius: 18px;
+    padding: 6px 12px;
+    font-size: 12px;
+    color: #1b4332;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .input-area {
+    padding: 10px 14px 14px;
+    background: #fff;
+    border-top: 1px solid #e8f5e9;
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+  }
+  textarea {
+    flex: 1;
+    border: 1.5px solid #b7e4c7;
+    border-radius: 18px;
+    padding: 9px 14px;
+    font-size: 14.5px;
+    outline: none;
+    resize: none;
+    font-family: inherit;
+    line-height: 1.4;
+    background: #f8faf9;
+    color: #1a1a2e;
+    max-height: 90px;
+    overflow-y: auto;
+  }
+  .send-btn {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, #1b4332, #2d6a4f);
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: opacity 0.2s;
+  }
+  .send-btn:disabled { background: #d8f3dc; cursor: default; }
+  .calendly-btn {
+    display: inline-block;
+    margin-top: 8px;
+    background: linear-gradient(135deg, #1b4332, #2d6a4f);
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    text-decoration: none;
+  }
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.65);
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    z-index: 100;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: #fff;
+    border-radius: 20px;
+    padding: 26px;
+    width: 100%;
+    max-width: 370px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+  }
+  .modal h2 { font-size: 17px; font-weight: 700; margin-bottom: 5px; color: #1a1a2e; }
+  .modal p { font-size: 13.5px; color: #555; margin-bottom: 18px; line-height: 1.5; }
+  .modal input {
+    width: 100%;
+    border: 1.5px solid #b7e4c7;
+    border-radius: 10px;
+    padding: 9px 13px;
+    font-size: 14px;
+    margin-bottom: 9px;
+    font-family: inherit;
+    outline: none;
+    background: #f8faf9;
+    color: #1a1a2e;
+  }
+  .modal-btns { display: flex; gap: 9px; margin-top: 6px; }
+  .modal-cancel {
+    flex: 1; padding: 10px;
+    border-radius: 10px;
+    border: 1.5px solid #ddd;
+    background: #fff;
+    color: #555;
+    font-size: 14px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .modal-submit {
+    flex: 2; padding: 10px;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(135deg, #1b4332, #2d6a4f);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .modal-submit:disabled { background: #d8f3dc; color: #999; cursor: default; }
+  ::-webkit-scrollbar { width: 3px; }
+  ::-webkit-scrollbar-thumb { background: #b7e4c7; border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="header">
+    <div class="avatar">🌱</div>
+    <div class="header-text">
+      <div class="header-name">Greenwich Connects</div>
+      <div class="header-sub">Free support for young adults in Greenwich</div>
+    </div>
+    <div class="header-btns">
+      <button class="btn-outline" onclick="toggleCats()">Browse</button>
+      <button class="btn-solid" onclick="openModal()">Talk to us</button>
+    </div>
+  </div>
+
+  <div class="categories" id="cats">
+    <div class="cat-label">What are you looking for?</div>
+    <div class="cat-pills">
+      <button class="cat-pill" onclick="catSend('Education and GED')">🎓 Education</button>
+      <button class="cat-pill" onclick="catSend('Jobs and career help')">💼 Jobs</button>
+      <button class="cat-pill" onclick="catSend('Mental health support')">🧠 Mental Health</button>
+      <button class="cat-pill" onclick="catSend('Housing help')">🏠 Housing</button>
+      <button class="cat-pill" onclick="catSend('Getting my driver license')">🚗 Driver License</button>
+      <button class="cat-pill" onclick="catSend('Arts and community')">🎨 Arts</button>
+      <button class="cat-pill" onclick="catSend('Legal help')">⚖️ Legal</button>
+      <button class="cat-pill" onclick="catSend('Financial help')">💰 Finances</button>
+      <button class="cat-pill" onclick="catSend('Interview prep')">🎯 Interview Prep</button>
+    </div>
+  </div>
+
+  <div class="messages" id="messages"></div>
+
+  <div class="quick-replies" id="quickReplies">
+    <button class="qr-btn" onclick="qrSend('I don\'t know what I want')">I don't know what I want</button>
+    <button class="qr-btn" onclick="qrSend('I\'m looking for a job')">Looking for a job</button>
+    <button class="qr-btn" onclick="qrSend('I need some support')">I need support</button>
+    <button class="qr-btn" onclick="qrSend('I want to meet people')">Meet people</button>
+    <button class="qr-btn" onclick="qrSend('Tell me about Greenwich Connects')">About GC</button>
+  </div>
+
+  <div class="input-area">
+    <textarea id="input" placeholder="Type something..." rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+    <button class="send-btn" id="sendBtn" onclick="sendMessage()" disabled>➤</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div style="font-size:24px;margin-bottom:6px;">🙌</div>
+    <h2>Connect with our team</h2>
+    <p>Leave your info and someone from Greenwich Connects will reach out. Real talk, no spam.</p>
+    <input type="text" id="m-name" placeholder="First name">
+    <input type="text" id="m-contact" placeholder="Phone or email (your choice)">
+    <input type="text" id="m-topic" placeholder="What do you want to talk about? (optional)">
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+      <button class="modal-submit" id="m-submit" onclick="submitHandoff()" disabled>Send my info</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const FORMSPREE_INQUIRIES = 'https://formspree.io/f/xgoprbvp';
+const FORMSPREE_MENTORS = 'https://formspree.io/f/mykblakj';
+const CALENDLY_DOMNA = 'https://calendly.com/domnadali/30min';
+const AIRTABLE_BASE = 'appMJkHEuLp9SKTqr';
+
+const SYSTEM = `You are the Greenwich Connects Resource Agent — a warm, real guide for young people ages 14-25 in and around Greenwich CT. You are a digital extension of the Greenwich Connects mentor team.
+
+FORMATTING RULES:
+Never use markdown formatting, no bold, no bullet points, no headers, no dashes, no em dashes.
+Write everything as plain conversational text like a real text message.
+If listing multiple resources write them naturally in a sentence.
+Keep it flowing and human, never formatted like a document.
+
+TONE:
+Warm, real, and normal like a genuine older sibling or young mentor who actually cares.
+Do NOT try to sound Gen Z or use slang. No "oh word" "no cap" "lowkey" or anything that feels like a brand trying to relate.
+Do NOT be formal or clinical either.
+Just sound like a real warm human being having a normal conversation.
+Short sentences. Simple words. Like texting a friend who happens to know everything about Greenwich.
+Age range is 14-24. Read the conversation and adjust energy accordingly.
+Never use em dashes anywhere.
+
+CORE PHILOSOPHY based on the Greenwich Connects mentor guide:
+Lead with listening. Build an organic relationship before anything else.
+NEVER assume anything about someone's background, mental health, finances, interests, or situation. Zero assumptions.
+Do NOT over-explain the program. Keep it very casual.
+Do NOT share referrals or resources right away. Don't overwhelm with next steps.
+Ask one gentle question at a time. Let the conversation breathe.
+Never judge. Never assume. Never overwhelm.
+If someone is under 18 be warm but note they may want to connect with the team directly.
+
+OPENING:
+Do NOT start with a menu. Open with something like:
+"Hey, welcome to Greenwich Connects. No pressure here at all. What's been on your mind lately?"
+
+GOAL DISCOVERY:
+Help them think about short and long term goals but never use those words. Ask naturally like:
+"If things were going well a year from now, what would that look like for you?"
+"Is there something you have been wanting to do but just haven't gotten to yet?"
+
+WHEN TO GIVE RESOURCES vs ROUTE TO MENTOR:
+ALWAYS give specific local resources first for concrete practical needs like driver license, GED, food, housing, jobs, ESL, mental health, financial help, legal help.
+After giving the resource offer to connect with a mentor or the GC team.
+ROUTE TO MENTOR for hyper specific personal connections like wanting a cop as a mentor, wanting to show art at a gallery, wanting to meet someone in a specific field.
+NEVER replace a concrete resource with just a mentor offer. Always give the resource first.
+
+WHEN THE NEED IS VERY SPECIFIC:
+Acknowledge it genuinely. Say something like "that is actually a really specific and real goal, I love that. That is something our team can help make happen. Want me to connect you with someone from Greenwich Connects?"
+Then move into handoff.
+
+MENTOR NETWORK:
+Domna: Born and raised in Greenwich. Works in tech and AI professionally. Also a yoga and wellness teacher and an English teacher for immigrant adults. Fluent in Spanish. Can help with interview coaching, career coaching, navigating the local community, health and wellness, and immigrant support.
+When relevant say something like "We actually have someone in our network who does exactly that. Her name is Domna, she grew up right here in Greenwich and works in tech and AI, also teaches yoga. Want me to connect you two?" Then mention her Calendly is available for booking.
+
+UPCOMING EVENTS:
+Flow and Form on Thursday March 12th at 7pm at the YMCA of Greenwich, 50 East Putnam Ave. Free 75 minute session starting with gentle yoga then a hands-on air-dry clay workshop. No experience needed, all materials provided. Register at luma.com/dzx5nvb3. Mention this naturally when someone is interested in art, wellness, creativity, or meeting people.
+
+CRISIS SUPPORT:
+If someone mentions suicide, self-harm, abuse, or being in danger pause the normal conversation completely and respond with:
+"I hear you. You don't have to go through this alone. There are real people available right now, free and confidential. The Greenwich Connects team will also follow up with you tomorrow."
+Then share: 988 Suicide and Crisis Lifeline, Crisis Text Line text HOME to 741741, Kids in Crisis 203-661-1911, Trevor Project for LGBTQ+ 1-866-488-7386, YWCA abuse hotline 203-622-0003.
+After sharing crisis resources gently ask if they want the GC team to follow up tomorrow and collect their name and contact.
+
+HUMAN HANDOFF:
+If someone wants to talk to a real person collect their first name and best contact then say "Perfect, someone from the team will reach out soon. You took a real step just by reaching out."
+
+LOCAL RESOURCES only share 1-2 at a time in context:
+
+EDUCATION AND GED: Online GED at onsego.com, Greenwich ACE GED at greenwichace.com, Greenwich ACE ESL at greenwichace.com, Foundation of Hope ESL at foundationofhope.us/esl.html, Greenwich Library ESL at greenwichlibrary.org, CT State Community College of Norwalk, Housatonic Community College, Naugatuck Valley Community College.
+
+CAREER AND JOBS: Greenwich Young Professionals Group at greenwichypg.com, Career Group Inc at careergroupcompanies.com, Reach Prep at reachprep.org, Greenwich ACE at greenwichace.com, Resume Etc at resumeetc.com.
+
+INTERVIEW PREP: Greenwich Connects mentors can do mock interviews directly, Greenwich ACE career readiness at greenwichace.com, Reach Prep at reachprep.org.
+
+MENTAL HEALTH: Family Centers 203-629-2822 at familycenters.org, Child Guidance Center 203-324-6127, Jewish Family Services 203-622-1881 at jfsgreenwich.org, Centro Bienestar 203-883-8135 for Spanish language support, Yale New Haven Greenwich Hospital 203-863-3316 for ages 14-21, Kids in Crisis 203-661-1911.
+
+SUBSTANCE USE: Liberation Programs at Greenwich High School and YMCA Greenwich, contact Heidi at 203-399-3664, Positive Directions 203-227-7644 at positivedirections.org, Backcountry Wellness at backcountrywellness.com.
+
+HOUSING: Pacific House at pacifichouse.org, Inspirica at inspiricact.org, Greenwich YMCA at ywcagreenwich.org, Open Doors Shelter in Norwalk at opendoorsct.org, Greenwich Dept of Human Services 203-622-3800, Emergency Housing dial 211 press 3.
+
+BASIC NEEDS: Neighbor to Neighbor 203-622-9208 at 248 East Putnam Ave, JFS Mobile Pantry Wednesdays 9-10am at 1 Holly Hill Lane, SNAP benefits at connect.ct.gov, Greenwich Dept of Human Services 203-622-3800.
+
+FINANCIAL LITERACY: Thrivent Money Canvas free coaching at thrivent.com/money-canvas, FDIC Money Smart free curriculum, CT Dept of Banking at portal.ct.gov/DOB, Greenwich ACE financial literacy at greenwichace.com.
+
+TRANSPORTATION AND DRIVERS LICENSE: Fresh Green Light at freshgreenlight.com, The Next Street at thenextstreet.com, Toms Driving School at tomsdrivingschoolct.com, Epic Driving School at epicct.com, Central Driving School 8 hour course at centraldrivingschoolct.com, free DMV practice tests at norwalkpl.org.
+
+LEGAL AND IMMIGRATION: JFS Immigration Support 203-622-1881 at jfsgreenwich.org, Catholic Charities at ccfairfield.org, Building One Community for legal immigration services and English classes, YWCA Civil Legal Clinic at ywcagreenwich.org, Statewide Legal Services at slsct.org.
+
+ARTS AND COMMUNITY: Greenwich Arts Council at greenwichartscouncil.org, Greenwich Arts Society at greenwichartsociety.org, Boys and Girls Club at bgcg.org, Greenwich YMCA at greenwichymca.org, Greenwich Library at greenwichlibrary.org, Audubon Center at audubon.org/greenwich, Chelsea Piers Stamford.`;
+
+let history = [];
+let msgCount = 0;
+
+function addMessage(role, content, includeCalendly = false) {
+  const msgs = document.getElementById('messages');
+  const wrap = document.createElement('div');
+  wrap.className = `msg ${role}`;
+  if (role === 'assistant') {
+    const av = document.createElement('div');
+    av.className = 'msg-avatar';
+    av.textContent = '🌱';
+    wrap.appendChild(av);
+  }
+  const bub = document.createElement('div');
+  bub.className = `bubble ${role === 'assistant' ? 'agent' : 'user'}`;
+  bub.textContent = content;
+  if (includeCalendly) {
+    const btn = document.createElement('a');
+    btn.href = CALENDLY_DOMNA;
+    btn.target = '_blank';
+    btn.className = 'calendly-btn';
+    btn.textContent = 'Book a time with our team';
+    bub.appendChild(document.createElement('br'));
+    bub.appendChild(btn);
+  }
+  wrap.appendChild(bub);
+  msgs.appendChild(wrap);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function addTyping() {
+  const msgs = document.getElementById('messages');
+  const wrap = document.createElement('div');
+  wrap.className = 'msg assistant';
+  wrap.id = 'typing';
+  const av = document.createElement('div');
+  av.className = 'msg-avatar';
+  av.textContent = '🌱';
+  const bub = document.createElement('div');
+  bub.className = 'typing-bubble';
+  bub.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
+  wrap.appendChild(av);
+  wrap.appendChild(bub);
+  msgs.appendChild(wrap);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function removeTyping() {
+  const t = document.getElementById('typing');
+  if (t) t.remove();
+}
+
+async function sendMessage(text) {
+  const input = document.getElementById('input');
+  const msg = text || input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  input.style.height = 'auto';
+  document.getElementById('sendBtn').disabled = true;
+  document.getElementById('quickReplies').style.display = 'none';
+  addMessage('user', msg);
+  history.push({ role: 'user', content: msg });
+  addTyping();
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: history, system: SYSTEM })
+    });
+    const data = await res.json();
+    removeTyping();
+    let reply = "Something went wrong. Try again?";
+    if (data && data.content && Array.isArray(data.content)) {
+      const textBlock = data.content.find(b => b.type === 'text');
+      if (textBlock && textBlock.text) reply = textBlock.text;
+    } else if (data && data.text) {
+      reply = data.text;
+    } else if (typeof data === 'string') {
+      reply = data;
+    }
+    const showCalendly = reply.toLowerCase().includes('calendly') || reply.toLowerCase().includes('book a time') || reply.toLowerCase().includes('schedule');
+    addMessage('assistant', reply, showCalendly);
+    history.push({ role: 'assistant', content: reply });
+    msgCount++;
+  } catch(err) {
+    removeTyping();
+    console.error('Error:', err);
+    addMessage('assistant', "Something went wrong on my end. Try sending that again?");
+  }
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 'px';
+  document.getElementById('sendBtn').disabled = !el.value.trim();
+}
+
+function toggleCats() {
+  document.getElementById('cats').classList.toggle('open');
+}
+
+function catSend(msg) {
+  document.getElementById('cats').classList.remove('open');
+  sendMessage(msg);
+}
+
+function qrSend(msg) { sendMessage(msg); }
+
+function openModal() { document.getElementById('modal').classList.add('open'); }
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+
+document.getElementById('m-name').addEventListener('input', checkModal);
+document.getElementById('m-contact').addEventListener('input', checkModal);
+function checkModal() {
+  const n = document.getElementById('m-name').value.trim();
+  const c = document.getElementById('m-contact').value.trim();
+  document.getElementById('m-submit').disabled = !(n && c);
+}
+
+async function submitHandoff() {
+  const name = document.getElementById('m-name').value.trim();
+  const contact = document.getElementById('m-contact').value.trim();
+  const topic = document.getElementById('m-topic').value.trim();
+  closeModal();
+  try {
+    await fetch(FORMSPREE_INQUIRIES, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, contact, topic, source: 'Greenwich Connects Agent' })
+    });
+  } catch {}
+  addMessage('assistant', `Perfect! We've got your info, ${name}. Someone from the Greenwich Connects team will reach out at ${contact} soon. You took a real step just by reaching out.`);
+}
+
+window.onload = () => {
+  addMessage('assistant', "Hey, welcome to Greenwich Connects. No pressure here at all. What's been on your mind lately?");
+  history.push({ role: 'assistant', content: "Hey, welcome to Greenwich Connects. No pressure here at all. What's been on your mind lately?" });
+};
+</script>
+</body>
+</html>

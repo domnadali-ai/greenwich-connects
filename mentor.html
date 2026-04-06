@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Join Our Mentor Network — Greenwich Connects</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    min-height: 100vh;
+    padding: 32px 16px;
+    color: #1a1a2e;
+  }
+  .container { max-width: 560px; margin: 0 auto; }
+  .header {
+    background: linear-gradient(135deg, #1b4332, #2d6a4f);
+    border-radius: 16px;
+    padding: 28px;
+    color: #fff;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  .header .emoji { font-size: 36px; margin-bottom: 10px; }
+  .header h1 { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+  .header p { font-size: 13.5px; opacity: 0.8; line-height: 1.5; }
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: rgba(255,255,255,0.7);
+    font-size: 12px;
+    text-decoration: none;
+    margin-bottom: 16px;
+    font-weight: 500;
+  }
+  .card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+  }
+  .card h2 {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #2d6a4f;
+    margin-bottom: 16px;
+  }
+  .field { margin-bottom: 14px; }
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1a1a2e;
+    margin-bottom: 5px;
+  }
+  label .opt {
+    font-weight: 400;
+    color: #999;
+    font-size: 11px;
+    margin-left: 4px;
+  }
+  input, textarea {
+    width: 100%;
+    border: 1.5px solid #d0e8d8;
+    border-radius: 10px;
+    padding: 10px 13px;
+    font-size: 14px;
+    font-family: inherit;
+    color: #1a1a2e;
+    background: #f8faf9;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input:focus, textarea:focus {
+    border-color: #2d6a4f;
+    background: #fff;
+  }
+  textarea { resize: vertical; min-height: 80px; }
+  .note { font-size: 11px; color: #888; margin-top: 5px; line-height: 1.5; }
+  .pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+  .pill {
+    background: #f0faf4;
+    border: 1.5px solid #b7e4c7;
+    border-radius: 20px;
+    padding: 5px 13px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: #1b4332;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.15s;
+    font-family: inherit;
+    border-style: solid;
+  }
+  .pill.on {
+    background: #2d6a4f;
+    border-color: #2d6a4f;
+    color: #fff;
+  }
+  .submit {
+    width: 100%;
+    background: linear-gradient(135deg, #1b4332, #2d6a4f);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    margin-top: 6px;
+    transition: opacity 0.2s;
+  }
+  .submit:hover { opacity: 0.9; }
+  .submit:disabled { background: #d8f3dc; color: #999; cursor: default; }
+  .success {
+    display: none;
+    background: #fff;
+    border-radius: 16px;
+    padding: 36px 28px;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+  }
+  .success .emoji { font-size: 48px; margin-bottom: 14px; }
+  .success h2 { font-size: 20px; font-weight: 800; color: #1b4332; margin-bottom: 8px; }
+  .success p { font-size: 14px; color: #555; line-height: 1.6; }
+  .success a {
+    display: inline-block;
+    margin-top: 20px;
+    background: linear-gradient(135deg, #1b4332, #2d6a4f);
+    color: #fff;
+    border-radius: 20px;
+    padding: 10px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <a href="/" class="back-link">← Back to Greenwich Connects</a>
+
+  <div class="header">
+    <div class="emoji">🌱</div>
+    <h1>Join our Mentor Network</h1>
+    <p>Tell us about yourself so we can connect you with the right young people. Takes about 3 minutes.</p>
+  </div>
+
+  <form id="form">
+
+    <div class="card">
+      <h2>About You</h2>
+      <div class="field">
+        <label>Full Name</label>
+        <input type="text" id="name" placeholder="Your full name" required>
+      </div>
+      <div class="field">
+        <label>Your background <span class="opt">in your own words</span></label>
+        <textarea id="background" placeholder="Where are you from, what do you do, what shaped you? Keep it casual." required></textarea>
+        <div class="note">Example: "Born and raised in Greenwich, I work in tech and also teach yoga. I speak Spanish and have spent years supporting immigrant communities."</div>
+      </div>
+      <div class="field">
+        <label>Languages spoken <span class="opt">other than English</span></label>
+        <input type="text" id="languages" placeholder="e.g. Spanish, Portuguese — or leave blank">
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>How You Can Help</h2>
+      <div class="field">
+        <label>Areas you can support</label>
+        <div class="pills" id="areas">
+          <button type="button" class="pill" onclick="tog(this)">Career coaching</button>
+          <button type="button" class="pill" onclick="tog(this)">Interview prep</button>
+          <button type="button" class="pill" onclick="tog(this)">Job searching</button>
+          <button type="button" class="pill" onclick="tog(this)">Health and wellness</button>
+          <button type="button" class="pill" onclick="tog(this)">Arts and creativity</button>
+          <button type="button" class="pill" onclick="tog(this)">Sports</button>
+          <button type="button" class="pill" onclick="tog(this)">Tech and AI</button>
+          <button type="button" class="pill" onclick="tog(this)">Immigrant support</button>
+          <button type="button" class="pill" onclick="tog(this)">ESL support</button>
+          <button type="button" class="pill" onclick="tog(this)">Financial literacy</button>
+          <button type="button" class="pill" onclick="tog(this)">Legal navigation</button>
+          <button type="button" class="pill" onclick="tog(this)">Mental health support</button>
+          <button type="button" class="pill" onclick="tog(this)">Entrepreneurship</button>
+          <button type="button" class="pill" onclick="tog(this)">Local community</button>
+          <button type="button" class="pill" onclick="tog(this)">Gaming</button>
+          <button type="button" class="pill" onclick="tog(this)">Music</button>
+          <button type="button" class="pill" onclick="tog(this)">Law enforcement</button>
+          <button type="button" class="pill" onclick="tog(this)">Medicine and healthcare</button>
+          <button type="button" class="pill" onclick="tog(this)">Education</button>
+          <button type="button" class="pill" onclick="tog(this)">Real estate</button>
+          <button type="button" class="pill" onclick="tog(this)">Construction and trades</button>
+          <button type="button" class="pill" onclick="tog(this)">Culinary arts</button>
+        </div>
+      </div>
+      <div class="field" style="margin-top:14px;">
+        <label>Anything else you want teens to know <span class="opt">optional</span></label>
+        <textarea id="extra" placeholder="A message to a teen reading your profile, or anything specific you are passionate about..."></textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Availability</h2>
+      <div class="field">
+        <label>What kind of mentorship works for you?</label>
+        <div class="pills" id="avail">
+          <button type="button" class="pill" onclick="tog(this)">One-time conversation</button>
+          <button type="button" class="pill" onclick="tog(this)">Casual coffee or chat</button>
+          <button type="button" class="pill" onclick="tog(this)">Ongoing mentorship</button>
+          <button type="button" class="pill" onclick="tog(this)">Virtual only</button>
+          <button type="button" class="pill" onclick="tog(this)">In person</button>
+          <button type="button" class="pill" onclick="tog(this)">Either works</button>
+        </div>
+      </div>
+      <div class="field" style="margin-top:14px;">
+        <label>Your Calendly link <span class="opt">so teens can book time with you directly</span></label>
+        <input type="url" id="calendly" placeholder="https://calendly.com/yourname/...">
+        <div class="note">Do not have one yet? Go to calendly.com and create a free account. Takes 5 minutes. Or leave blank and we will follow up.</div>
+      </div>
+      <div class="field">
+        <label>Best way for the GC team to reach you</label>
+        <input type="text" id="contact" placeholder="Email or phone number" required>
+      </div>
+    </div>
+
+    <button type="submit" class="submit" id="submitBtn">Submit my mentor profile</button>
+
+  </form>
+
+  <div class="success" id="success">
+    <div class="emoji">🙌</div>
+    <h2>You are in!</h2>
+    <p>Thank you for joining the Greenwich Connects mentor network. We will be in touch when we have a match for you. It means a lot that you are part of this.</p>
+    <a href="/">Back to Greenwich Connects</a>
+  </div>
+
+</div>
+
+<script>
+const FORMSPREE = 'https://formspree.io/f/mykblakj';
+
+function tog(el) { el.classList.toggle('on'); }
+
+document.getElementById('name').addEventListener('input', check);
+document.getElementById('contact').addEventListener('input', check);
+function check() {
+  const n = document.getElementById('name').value.trim();
+  const c = document.getElementById('contact').value.trim();
+  document.getElementById('submitBtn').disabled = !(n && c);
+}
+check();
+
+document.getElementById('form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const btn = document.getElementById('submitBtn');
+  btn.textContent = 'Submitting...';
+  btn.disabled = true;
+
+  const areas = [...document.querySelectorAll('#areas .on')].map(el => el.textContent).join(', ');
+  const avail = [...document.querySelectorAll('#avail .on')].map(el => el.textContent).join(', ');
+
+  const payload = {
+    name: document.getElementById('name').value.trim(),
+    background: document.getElementById('background').value.trim(),
+    languages: document.getElementById('languages').value.trim(),
+    areas,
+    extra: document.getElementById('extra').value.trim(),
+    availability: avail,
+    calendly: document.getElementById('calendly').value.trim(),
+    contact: document.getElementById('contact').value.trim(),
+    source: 'Greenwich Connects Mentor Form'
+  };
+
+  try {
+    await fetch(FORMSPREE, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+  } catch {}
+
+  document.getElementById('form').style.display = 'none';
+  document.getElementById('success').style.display = 'block';
+  window.scrollTo(0, 0);
+});
+</script>
+</body>
+</html>
