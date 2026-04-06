@@ -401,7 +401,9 @@ If someone mentions suicide, self-harm, abuse, or being in danger pause the norm
 Then share: 988 Suicide and Crisis Lifeline, Crisis Text Line text HOME to 741741, Kids in Crisis 203-661-1911, Trevor Project for LGBTQ+ 1-866-488-7386, YWCA abuse hotline 203-622-0003.
 After sharing crisis resources gently ask if they want the GC team to follow up tomorrow and collect their name and contact.
 
-HUMAN HANDOFF:
+MEMORY:
+When a teen shares their first name at any point in the conversation, remember it and use it naturally. When they go through the handoff flow and share their name and contact, end your response with exactly this on its own line: SAVE_PROFILE:[their first name]:[brief summary of what they shared and need]
+Example: SAVE_PROFILE:Marcus:Looking for a job in tech, interested in connecting with a mentor
 If someone wants to talk to a real person respond warmly and give them two options in a natural way. Something like "You can grab a time directly on our calendar right here if you want to lock something in, or if you would rather someone reach out to you first just share your name and the best way to contact you and we will be in touch." Then end your message with exactly this text on its own line: SHOW_CALENDLY
 
 LOCAL RESOURCES only share 1-2 at a time in context:
@@ -430,29 +432,29 @@ ARTS AND COMMUNITY: Greenwich Arts Council at greenwichartscouncil.org, Greenwic
 
 let history = [];
 let msgCount = 0;
-let userCode = null;
 let userProfile = {};
-
-async function fetchProfile(code) {
-  try {
-    const res = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code })
-    });
-    const data = await res.json();
-    return data.profile;
-  } catch { return null; }
-}
+let profileSaved = false;
 
 async function saveProfile(fields) {
   try {
     await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ saveProfile: { Code: userCode, ...fields } })
+      body: JSON.stringify({ saveProfile: fields })
     });
   } catch {}
+}
+
+async function lookupByName(name) {
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ lookupName: name })
+    });
+    const data = await res.json();
+    return data.profile || null;
+  } catch { return null; }
 }
 
 function addMessage(role, content, includeCalendly = false) {
@@ -512,22 +514,6 @@ async function sendMessage(text) {
   input.style.height = 'auto';
   document.getElementById('sendBtn').disabled = true;
   document.getElementById('quickReplies').style.display = 'none';
-
-  // Check if this looks like a nickname being set
-  if (!userCode && msg.split(' ').length === 1 && msg.length >= 3 && msg.length <= 20) {
-    const lastMsg = history[history.length - 1];
-    if (lastMsg && lastMsg.content && lastMsg.content.includes('nickname')) {
-      userCode = msg.toUpperCase();
-      localStorage.setItem('gc_code', userCode);
-      addMessage('user', msg);
-      addMessage('assistant', `Got it, I will remember you as ${userCode}. What were we talking about?`);
-      history.push({ role: 'user', content: msg });
-      history.push({ role: 'assistant', content: `Got it, I will remember you as ${userCode}.` });
-      await saveProfile({ FirstName: '', Interests: '', Goals: '', LastSummary: '', LastActive: new Date().toISOString().split('T')[0] });
-      return;
-    }
-  }
-
   addMessage('user', msg);
   history.push({ role: 'user', content: msg });
   addTyping();
@@ -614,39 +600,13 @@ async function submitHandoff() {
 }
 
 window.onload = () => {
-  const stored = localStorage.getItem('gc_code');
-  if (stored) {
-    userCode = stored;
-    fetchProfile(stored).then(profile => {
-      if (profile) {
-        userProfile = profile;
-        const name = profile.FirstName || 'there';
-        const welcome = `Hey, welcome back${name !== 'there' ? ' ' + name : ''}. Good to hear from you again. What's been going on?`;
-        addMessage('assistant', welcome);
-        history.push({ role: 'assistant', content: welcome });
-        if (profile.LastSummary) {
-          history.unshift({ role: 'user', content: `[Context from previous conversations: ${profile.LastSummary}]` });
-        }
-      } else {
-        startFresh();
-      }
-    });
-  } else {
-    startFresh();
-  }
+  startFresh();
 };
 
 function startFresh() {
   const welcome = "Hey, welcome to Greenwich Connects. No pressure here at all. What's been on your mind lately?";
   addMessage('assistant', welcome);
   history.push({ role: 'assistant', content: welcome });
-  setTimeout(() => askForCode(), 8000);
-}
-
-function askForCode() {
-  if (userCode) return;
-  addMessage('assistant', "By the way, if you want me to remember you next time you can pick a nickname — just any word you like. Totally optional.");
-  history.push({ role: 'assistant', content: "By the way, if you want me to remember you next time you can pick a nickname — just any word you like. Totally optional." });
 }
 </script>
 </body>
