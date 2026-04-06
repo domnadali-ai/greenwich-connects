@@ -402,7 +402,7 @@ Then share: 988 Suicide and Crisis Lifeline, Crisis Text Line text HOME to 74174
 After sharing crisis resources gently ask if they want the GC team to follow up tomorrow and collect their name and contact.
 
 HUMAN HANDOFF:
-If someone wants to talk to a real person collect their first name and best contact then say "Perfect, someone from the team will reach out soon. You took a real step just by reaching out."
+If someone wants to talk to a real person respond warmly and give them two options in a natural way. Something like "You can grab a time directly on our calendar right here if you want to lock something in, or if you would rather someone reach out to you first just share your name and the best way to contact you and we will be in touch." Then end your message with exactly this text on its own line: SHOW_CALENDLY
 
 LOCAL RESOURCES only share 1-2 at a time in context:
 
@@ -430,6 +430,30 @@ ARTS AND COMMUNITY: Greenwich Arts Council at greenwichartscouncil.org, Greenwic
 
 let history = [];
 let msgCount = 0;
+let userCode = null;
+let userProfile = {};
+
+async function fetchProfile(code) {
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code })
+    });
+    const data = await res.json();
+    return data.profile;
+  } catch { return null; }
+}
+
+async function saveProfile(fields) {
+  try {
+    await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ saveProfile: { Code: userCode, ...fields } })
+    });
+  } catch {}
+}
 
 function addMessage(role, content, includeCalendly = false) {
   const msgs = document.getElementById('messages');
@@ -488,6 +512,22 @@ async function sendMessage(text) {
   input.style.height = 'auto';
   document.getElementById('sendBtn').disabled = true;
   document.getElementById('quickReplies').style.display = 'none';
+
+  // Check if this looks like a nickname being set
+  if (!userCode && msg.split(' ').length === 1 && msg.length >= 3 && msg.length <= 20) {
+    const lastMsg = history[history.length - 1];
+    if (lastMsg && lastMsg.content && lastMsg.content.includes('nickname')) {
+      userCode = msg.toUpperCase();
+      localStorage.setItem('gc_code', userCode);
+      addMessage('user', msg);
+      addMessage('assistant', `Got it, I will remember you as ${userCode}. What were we talking about?`);
+      history.push({ role: 'user', content: msg });
+      history.push({ role: 'assistant', content: `Got it, I will remember you as ${userCode}.` });
+      await saveProfile({ FirstName: '', Interests: '', Goals: '', LastSummary: '', LastActive: new Date().toISOString().split('T')[0] });
+      return;
+    }
+  }
+
   addMessage('user', msg);
   history.push({ role: 'user', content: msg });
   addTyping();
@@ -499,23 +539,27 @@ async function sendMessage(text) {
     });
     const data = await res.json();
     removeTyping();
+    console.log('API response:', JSON.stringify(data));
+    
+    if (data.error) {
+      addMessage('assistant', 'API Error: ' + JSON.stringify(data.error));
+      return;
+    }
+    
     let reply = "Something went wrong. Try again?";
     if (data && data.content && Array.isArray(data.content)) {
       const textBlock = data.content.find(b => b.type === 'text');
       if (textBlock && textBlock.text) reply = textBlock.text;
-    } else if (data && data.text) {
-      reply = data.text;
-    } else if (typeof data === 'string') {
-      reply = data;
     }
-    const showCalendly = reply.toLowerCase().includes('calendly') || reply.toLowerCase().includes('book a time') || reply.toLowerCase().includes('schedule');
+    const showCalendly = reply.includes('SHOW_CALENDLY') || reply.toLowerCase().includes('calendly') || reply.toLowerCase().includes('book a time');
+    reply = reply.replace('SHOW_CALENDLY', '').trim();
     addMessage('assistant', reply, showCalendly);
     history.push({ role: 'assistant', content: reply });
     msgCount++;
   } catch(err) {
     removeTyping();
-    console.error('Error:', err);
-    addMessage('assistant', "Something went wrong on my end. Try sending that again?");
+    console.error('Fetch error:', err);
+    addMessage('assistant', 'Error: ' + err.message);
   }
 }
 
@@ -570,9 +614,40 @@ async function submitHandoff() {
 }
 
 window.onload = () => {
-  addMessage('assistant', "Hey, welcome to Greenwich Connects. No pressure here at all. What's been on your mind lately?");
-  history.push({ role: 'assistant', content: "Hey, welcome to Greenwich Connects. No pressure here at all. What's been on your mind lately?" });
+  const stored = localStorage.getItem('gc_code');
+  if (stored) {
+    userCode = stored;
+    fetchProfile(stored).then(profile => {
+      if (profile) {
+        userProfile = profile;
+        const name = profile.FirstName || 'there';
+        const welcome = `Hey, welcome back${name !== 'there' ? ' ' + name : ''}. Good to hear from you again. What's been going on?`;
+        addMessage('assistant', welcome);
+        history.push({ role: 'assistant', content: welcome });
+        if (profile.LastSummary) {
+          history.unshift({ role: 'user', content: `[Context from previous conversations: ${profile.LastSummary}]` });
+        }
+      } else {
+        startFresh();
+      }
+    });
+  } else {
+    startFresh();
+  }
 };
+
+function startFresh() {
+  const welcome = "Hey, welcome to Greenwich Connects. No pressure here at all. What's been on your mind lately?";
+  addMessage('assistant', welcome);
+  history.push({ role: 'assistant', content: welcome });
+  setTimeout(() => askForCode(), 8000);
+}
+
+function askForCode() {
+  if (userCode) return;
+  addMessage('assistant', "By the way, if you want me to remember you next time you can pick a nickname — just any word you like. Totally optional.");
+  history.push({ role: 'assistant', content: "By the way, if you want me to remember you next time you can pick a nickname — just any word you like. Totally optional." });
+}
 </script>
 </body>
 </html>
