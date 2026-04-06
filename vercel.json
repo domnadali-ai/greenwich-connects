@@ -1,0 +1,7 @@
+
+{
+  "rewrites": [
+    { "source": "/mentor", "destination": "/mentor.html" },
+    { "source": "/", "destination": "/index.html" }
+  ]
+}
