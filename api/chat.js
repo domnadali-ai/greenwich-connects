@@ -5,8 +5,23 @@ export default async function handler(req, res) {
   const AIRTABLE_TOKEN = process.env.AIRTABLE_TOKEN;
   const BASE = 'appMJkHEuLp9SKTqr';
 
-  // Fetch profile from Airtable
-  if (code && !saveProfile) {
+  // Lookup by name
+  if (req.body.lookupName) {
+    const name = req.body.lookupName;
+    try {
+      const r = await fetch(
+        `https://api.airtable.com/v0/${BASE}/Profiles?filterByFormula=LOWER({FirstName})="${name.toLowerCase()}"`,
+        { headers: { Authorization: `Bearer ${AIRTABLE_TOKEN}` } }
+      );
+      const d = await r.json();
+      if (d.records && d.records.length > 0) {
+        return res.status(200).json({ profile: d.records[0].fields });
+      }
+      return res.status(200).json({ profile: null });
+    } catch { return res.status(200).json({ profile: null }); }
+  }
+
+  // Fetch profile by code
     try {
       const r = await fetch(
         `https://api.airtable.com/v0/${BASE}/Profiles?filterByFormula={Code}="${code}"`,
