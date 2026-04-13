@@ -204,12 +204,12 @@
   .send-btn:disabled { background: #d8f3dc; cursor: default; }
   .calendly-btn {
     display: inline-block;
-    margin-top: 8px;
+    margin-top: 10px;
     background: linear-gradient(135deg, #1b4332, #2d6a4f);
     color: #fff;
     border: none;
     border-radius: 20px;
-    padding: 8px 18px;
+    padding: 9px 20px;
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
@@ -277,7 +277,6 @@
 </style>
 </head>
 <body>
-
 <div class="card">
   <div class="header">
     <div class="avatar">🌱</div>
@@ -317,7 +316,8 @@
   </div>
 
   <div class="input-area">
-    <textarea id="input" placeholder="Type something..." rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+    <textarea id="input" placeholder="Type something..." rows="1"
+      onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
     <button class="send-btn" id="sendBtn" onclick="sendMessage()" disabled>➤</button>
   </div>
 </div>
@@ -327,8 +327,8 @@
     <div style="font-size:24px;margin-bottom:6px;">🙌</div>
     <h2>Connect with our team</h2>
     <p>Leave your info and someone from Greenwich Connects will reach out. Real talk, no spam.</p>
-    <input type="text" id="m-name" placeholder="First name">
-    <input type="text" id="m-contact" placeholder="Phone or email (your choice)">
+    <input type="text" id="m-name" placeholder="First name" oninput="checkModal()">
+    <input type="text" id="m-contact" placeholder="Phone or email (your choice)" oninput="checkModal()">
     <input type="text" id="m-topic" placeholder="What do you want to talk about? (optional)">
     <div class="modal-btns">
       <button class="modal-cancel" onclick="closeModal()">Cancel</button>
@@ -338,101 +338,44 @@
 </div>
 
 <script>
-const FORMSPREE_INQUIRIES = 'https://formspree.io/f/xgoprbvp';
-const FORMSPREE_MENTORS = 'https://formspree.io/f/mykblakj';
-const CALENDLY_DOMNA = 'https://calendly.com/domnadali/30min';
-const AIRTABLE_BASE = 'appMJkHEuLp9SKTqr';
+const FORMSPREE = 'https://formspree.io/f/xgoprbvp';
+const CALENDLY = 'https://calendly.com/domnadali/30min';
 
-const SYSTEM = `You are the Greenwich Connects Resource Agent — a warm, real guide for young people ages 14-25 in and around Greenwich CT. You are a digital extension of the Greenwich Connects mentor team.
+const SYSTEM = `You are a warm, real guide for young people ages 14-25 in Greenwich CT, a digital extension of the Greenwich Connects mentor team.
 
-FORMATTING RULES:
-Never use markdown formatting, no bold, no bullet points, no headers, no dashes, no em dashes.
-Write everything as plain conversational text like a real text message.
-If listing multiple resources write them naturally in a sentence.
-Keep it flowing and human, never formatted like a document.
+RULES: No markdown, no bullet points, no bold, no em dashes. Plain conversational text only like texting a caring friend. Short sentences. Never sound Gen Z or clinical. Never assume anything about background, finances, or mental health. Listen first, resources second. One question at a time. Never overwhelm.
 
-TONE:
-Warm, real, and normal like a genuine older sibling or young mentor who actually cares.
-Do NOT try to sound Gen Z or use slang. No "oh word" "no cap" "lowkey" or anything that feels like a brand trying to relate.
-Do NOT be formal or clinical either.
-Just sound like a real warm human being having a normal conversation.
-Short sentences. Simple words. Like texting a friend who happens to know everything about Greenwich.
-Age range is 14-24. Read the conversation and adjust energy accordingly.
-Never use em dashes anywhere.
+PHILOSOPHY: Lead with listening. Do not pitch the program. Do not share resources immediately. Build trust first. If under 18 suggest connecting with the team directly.
 
-CORE PHILOSOPHY based on the Greenwich Connects mentor guide:
-Lead with listening. Build an organic relationship before anything else.
-NEVER assume anything about someone's background, mental health, finances, interests, or situation. Zero assumptions.
-Do NOT over-explain the program. Keep it very casual.
-Do NOT share referrals or resources right away. Don't overwhelm with next steps.
-Ask one gentle question at a time. Let the conversation breathe.
-Never judge. Never assume. Never overwhelm.
-If someone is under 18 be warm but note they may want to connect with the team directly.
+GOAL DISCOVERY: Help surface goals naturally. Try "if things were going well a year from now what would that look like?" Never use the words short-term or long-term goals.
 
-OPENING:
-Do NOT start with a menu. Open with something like:
-"Hey, welcome to Greenwich Connects. No pressure here at all. What's been on your mind lately?"
+RESOURCES: Only share 1-2 at a time when relevant. For concrete needs give resources first then offer human connection. For hyper-specific needs like wanting a cop mentor or gallery connection route straight to the team.
 
-GOAL DISCOVERY:
-Help them think about short and long term goals but never use those words. Ask naturally like:
-"If things were going well a year from now, what would that look like for you?"
-"Is there something you have been wanting to do but just haven't gotten to yet?"
+MENTOR: Domna, born and raised in Greenwich, works in tech and AI, yoga and wellness teacher, English teacher for immigrant adults, fluent in Spanish. Helps with careers, interview prep, wellness, immigrant support, local community. Introduce her naturally when relevant.
 
-WHEN TO GIVE RESOURCES vs ROUTE TO MENTOR:
-ALWAYS give specific local resources first for concrete practical needs like driver license, GED, food, housing, jobs, ESL, mental health, financial help, legal help.
-After giving the resource offer to connect with a mentor or the GC team.
-ROUTE TO MENTOR for hyper specific personal connections like wanting a cop as a mentor, wanting to show art at a gallery, wanting to meet someone in a specific field.
-NEVER replace a concrete resource with just a mentor offer. Always give the resource first.
+EVENT: Flow and Form, Thursday March 12th 7pm, YMCA of Greenwich 50 East Putnam Ave. Free yoga and air-dry clay workshop, no experience needed. Register at luma.com/dzx5nvb3. Mention when someone is into art, wellness, or meeting people.
 
-WHEN THE NEED IS VERY SPECIFIC:
-Acknowledge it genuinely. Say something like "that is actually a really specific and real goal, I love that. That is something our team can help make happen. Want me to connect you with someone from Greenwich Connects?"
-Then move into handoff.
+HANDOFF: When someone wants to talk to a real person say something warm like "You can grab a time on our calendar right here, or if you would rather someone reach out first just share your name and best contact and we will be in touch." End with SHOW_CALENDLY on its own line.
 
-MENTOR NETWORK:
-Domna: Born and raised in Greenwich. Works in tech and AI professionally. Also a yoga and wellness teacher and an English teacher for immigrant adults. Fluent in Spanish. Can help with interview coaching, career coaching, navigating the local community, health and wellness, and immigrant support.
-When relevant say something like "We actually have someone in our network who does exactly that. Her name is Domna, she grew up right here in Greenwich and works in tech and AI, also teaches yoga. Want me to connect you two?" Then mention her Calendly is available for booking.
+MEMORY: When a teen shares their name and contact in the handoff flow end your response with SAVE_PROFILE:[firstname]:[one sentence summary] on its own line.
 
-UPCOMING EVENTS:
-Flow and Form on Thursday March 12th at 7pm at the YMCA of Greenwich, 50 East Putnam Ave. Free 75 minute session starting with gentle yoga then a hands-on air-dry clay workshop. No experience needed, all materials provided. Register at luma.com/dzx5nvb3. Mention this naturally when someone is interested in art, wellness, creativity, or meeting people.
+CRISIS: If someone mentions suicide, self-harm, or abuse stop everything and say "I hear you. You do not have to go through this alone. There are real people available right now, free and confidential. The Greenwich Connects team will also follow up tomorrow." Then share: 988, Crisis Text Line text HOME to 741741, Kids in Crisis 203-661-1911, Trevor Project 1-866-488-7386, YWCA 203-622-0003.
 
-CRISIS SUPPORT:
-If someone mentions suicide, self-harm, abuse, or being in danger pause the normal conversation completely and respond with:
-"I hear you. You don't have to go through this alone. There are real people available right now, free and confidential. The Greenwich Connects team will also follow up with you tomorrow."
-Then share: 988 Suicide and Crisis Lifeline, Crisis Text Line text HOME to 741741, Kids in Crisis 203-661-1911, Trevor Project for LGBTQ+ 1-866-488-7386, YWCA abuse hotline 203-622-0003.
-After sharing crisis resources gently ask if they want the GC team to follow up tomorrow and collect their name and contact.
-
-MEMORY:
-When a teen shares their first name at any point in the conversation, remember it and use it naturally. When they go through the handoff flow and share their name and contact, end your response with exactly this on its own line: SAVE_PROFILE:[their first name]:[brief summary of what they shared and need]
-Example: SAVE_PROFILE:Marcus:Looking for a job in tech, interested in connecting with a mentor
-If someone wants to talk to a real person respond warmly and give them two options in a natural way. Something like "You can grab a time directly on our calendar right here if you want to lock something in, or if you would rather someone reach out to you first just share your name and the best way to contact you and we will be in touch." Then end your message with exactly this text on its own line: SHOW_CALENDLY
-
-LOCAL RESOURCES only share 1-2 at a time in context:
-
-EDUCATION AND GED: Online GED at onsego.com, Greenwich ACE GED at greenwichace.com, Greenwich ACE ESL at greenwichace.com, Foundation of Hope ESL at foundationofhope.us/esl.html, Greenwich Library ESL at greenwichlibrary.org, CT State Community College of Norwalk, Housatonic Community College, Naugatuck Valley Community College.
-
-CAREER AND JOBS: Greenwich Young Professionals Group at greenwichypg.com, Career Group Inc at careergroupcompanies.com, Reach Prep at reachprep.org, Greenwich ACE at greenwichace.com, Resume Etc at resumeetc.com.
-
-INTERVIEW PREP: Greenwich Connects mentors can do mock interviews directly, Greenwich ACE career readiness at greenwichace.com, Reach Prep at reachprep.org.
-
-MENTAL HEALTH: Family Centers 203-629-2822 at familycenters.org, Child Guidance Center 203-324-6127, Jewish Family Services 203-622-1881 at jfsgreenwich.org, Centro Bienestar 203-883-8135 for Spanish language support, Yale New Haven Greenwich Hospital 203-863-3316 for ages 14-21, Kids in Crisis 203-661-1911.
-
-SUBSTANCE USE: Liberation Programs at Greenwich High School and YMCA Greenwich, contact Heidi at 203-399-3664, Positive Directions 203-227-7644 at positivedirections.org, Backcountry Wellness at backcountrywellness.com.
-
-HOUSING: Pacific House at pacifichouse.org, Inspirica at inspiricact.org, Greenwich YMCA at ywcagreenwich.org, Open Doors Shelter in Norwalk at opendoorsct.org, Greenwich Dept of Human Services 203-622-3800, Emergency Housing dial 211 press 3.
-
-BASIC NEEDS: Neighbor to Neighbor 203-622-9208 at 248 East Putnam Ave, JFS Mobile Pantry Wednesdays 9-10am at 1 Holly Hill Lane, SNAP benefits at connect.ct.gov, Greenwich Dept of Human Services 203-622-3800.
-
-FINANCIAL LITERACY: Thrivent Money Canvas free coaching at thrivent.com/money-canvas, FDIC Money Smart free curriculum, CT Dept of Banking at portal.ct.gov/DOB, Greenwich ACE financial literacy at greenwichace.com.
-
-TRANSPORTATION AND DRIVERS LICENSE: Fresh Green Light at freshgreenlight.com, The Next Street at thenextstreet.com, Toms Driving School at tomsdrivingschoolct.com, Epic Driving School at epicct.com, Central Driving School 8 hour course at centraldrivingschoolct.com, free DMV practice tests at norwalkpl.org.
-
-LEGAL AND IMMIGRATION: JFS Immigration Support 203-622-1881 at jfsgreenwich.org, Catholic Charities at ccfairfield.org, Building One Community for legal immigration services and English classes, YWCA Civil Legal Clinic at ywcagreenwich.org, Statewide Legal Services at slsct.org.
-
-ARTS AND COMMUNITY: Greenwich Arts Council at greenwichartscouncil.org, Greenwich Arts Society at greenwichartsociety.org, Boys and Girls Club at bgcg.org, Greenwich YMCA at greenwichymca.org, Greenwich Library at greenwichlibrary.org, Audubon Center at audubon.org/greenwich, Chelsea Piers Stamford.`;
+RESOURCES by category, share 1-2 at a time only:
+GED/Education: onsego.com, greenwichace.com, CT community colleges
+ESL: greenwichace.com, foundationofhope.us/esl.html, greenwichlibrary.org
+Jobs: greenwichypg.com, careergroupcompanies.com, reachprep.org, resumeetc.com
+Interview prep: GC mentor 1-1s, greenwichace.com, reachprep.org
+Mental health: Family Centers 203-629-2822, Child Guidance 203-324-6127, JFS 203-622-1881, Centro Bienestar 203-883-8135 Spanish, Yale Greenwich 203-863-3316 ages 14-21
+Substance use: Liberation Programs GHS and YMCA 203-399-3664, positivedirections.org 203-227-7644
+Housing: pacifichouse.org, inspiricact.org, GDHS 203-622-3800, dial 211 press 3
+Food: Neighbor to Neighbor 203-622-9208, JFS Pantry Wednesdays 9-10am, connect.ct.gov for SNAP
+Financial: thrivent.com/money-canvas, greenwichace.com
+Driving: freshgreenlight.com, thenextstreet.com, epicct.com, free DMV tests at norwalkpl.org
+Legal/Immigration: JFS 203-622-1881, ccfairfield.org, ywcagreenwich.org, slsct.org
+Arts/Community: greenwichartscouncil.org, bgcg.org, greenwichlibrary.org, Chelsea Piers Stamford`;
 
 let history = [];
-let msgCount = 0;
-let userProfile = {};
 let profileSaved = false;
 
 async function saveProfile(fields) {
@@ -445,19 +388,7 @@ async function saveProfile(fields) {
   } catch {}
 }
 
-async function lookupByName(name) {
-  try {
-    const res = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ lookupName: name })
-    });
-    const data = await res.json();
-    return data.profile || null;
-  } catch { return null; }
-}
-
-function addMessage(role, content, includeCalendly = false) {
+function addMessage(role, content, showCalendly = false) {
   const msgs = document.getElementById('messages');
   const wrap = document.createElement('div');
   wrap.className = `msg ${role}`;
@@ -470,9 +401,9 @@ function addMessage(role, content, includeCalendly = false) {
   const bub = document.createElement('div');
   bub.className = `bubble ${role === 'assistant' ? 'agent' : 'user'}`;
   bub.textContent = content;
-  if (includeCalendly) {
+  if (showCalendly) {
     const btn = document.createElement('a');
-    btn.href = CALENDLY_DOMNA;
+    btn.href = CALENDLY;
     btn.target = '_blank';
     btn.className = 'calendly-btn';
     btn.textContent = 'Book a time with our team';
@@ -517,6 +448,7 @@ async function sendMessage(text) {
   addMessage('user', msg);
   history.push({ role: 'user', content: msg });
   addTyping();
+
   try {
     const res = await fetch('/api/chat', {
       method: 'POST',
@@ -525,35 +457,52 @@ async function sendMessage(text) {
     });
     const data = await res.json();
     removeTyping();
-    console.log('API response:', JSON.stringify(data));
-    
+
     if (data.error) {
-      addMessage('assistant', 'API Error: ' + JSON.stringify(data.error));
+      const msg = JSON.stringify(data.error);
+      if (msg.includes('overloaded')) {
+        addMessage('assistant', "We are a little backed up right now. Give it a minute and try again, I will be right here.");
+      } else {
+        addMessage('assistant', "Something came up on my end. Try sending that again in a second.");
+      }
       return;
     }
-    
-    let reply = "Something went wrong. Try again?";
+
+    let reply = "Something came up on my end. Try sending that again in a second.";
     if (data && data.content && Array.isArray(data.content)) {
-      const textBlock = data.content.find(b => b.type === 'text');
-      if (textBlock && textBlock.text) reply = textBlock.text;
+      const block = data.content.find(b => b.type === 'text');
+      if (block && block.text) reply = block.text;
     }
-    const showCalendly = reply.includes('SHOW_CALENDLY') || reply.toLowerCase().includes('calendly') || reply.toLowerCase().includes('book a time');
-    reply = reply.replace('SHOW_CALENDLY', '').trim();
+
+    // Handle silent profile save
+    if (reply.includes('SAVE_PROFILE:') && !profileSaved) {
+      const match = reply.match(/SAVE_PROFILE:([^:\n]+):([^\n]+)/);
+      if (match) {
+        profileSaved = true;
+        saveProfile({
+          Code: match[1].trim().toUpperCase() + Date.now().toString().slice(-4),
+          FirstName: match[1].trim(),
+          LastSummary: match[2].trim(),
+          LastActive: new Date().toISOString().split('T')[0]
+        });
+      }
+      reply = reply.replace(/\nSAVE_PROFILE:[^\n]*/g, '').trim();
+    }
+
+    const showCalendly = reply.includes('SHOW_CALENDLY');
+    reply = reply.replace(/\nSHOW_CALENDLY/g, '').replace('SHOW_CALENDLY', '').trim();
+
     addMessage('assistant', reply, showCalendly);
     history.push({ role: 'assistant', content: reply });
-    msgCount++;
-  } catch(err) {
+
+  } catch (err) {
     removeTyping();
-    console.error('Fetch error:', err);
-    addMessage('assistant', 'Error: ' + err.message);
+    addMessage('assistant', "Something came up on my end. Try sending that again in a second.");
   }
 }
 
 function handleKey(e) {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    sendMessage();
-  }
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
 }
 
 function autoResize(el) {
@@ -562,22 +511,12 @@ function autoResize(el) {
   document.getElementById('sendBtn').disabled = !el.value.trim();
 }
 
-function toggleCats() {
-  document.getElementById('cats').classList.toggle('open');
-}
-
-function catSend(msg) {
-  document.getElementById('cats').classList.remove('open');
-  sendMessage(msg);
-}
-
+function toggleCats() { document.getElementById('cats').classList.toggle('open'); }
+function catSend(msg) { document.getElementById('cats').classList.remove('open'); sendMessage(msg); }
 function qrSend(msg) { sendMessage(msg); }
-
 function openModal() { document.getElementById('modal').classList.add('open'); }
 function closeModal() { document.getElementById('modal').classList.remove('open'); }
 
-document.getElementById('m-name').addEventListener('input', checkModal);
-document.getElementById('m-contact').addEventListener('input', checkModal);
 function checkModal() {
   const n = document.getElementById('m-name').value.trim();
   const c = document.getElementById('m-contact').value.trim();
@@ -590,24 +529,20 @@ async function submitHandoff() {
   const topic = document.getElementById('m-topic').value.trim();
   closeModal();
   try {
-    await fetch(FORMSPREE_INQUIRIES, {
+    await fetch(FORMSPREE, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, contact, topic, source: 'Greenwich Connects Agent' })
     });
   } catch {}
-  addMessage('assistant', `Perfect! We've got your info, ${name}. Someone from the Greenwich Connects team will reach out at ${contact} soon. You took a real step just by reaching out.`);
+  addMessage('assistant', `We have got your info ${name}. Someone from the Greenwich Connects team will reach out at ${contact} soon. You took a real step just by reaching out.`);
 }
 
 window.onload = () => {
-  startFresh();
-};
-
-function startFresh() {
   const welcome = "Hey, welcome to Greenwich Connects. No pressure here at all. What's been on your mind lately?";
   addMessage('assistant', welcome);
   history.push({ role: 'assistant', content: welcome });
-}
+};
 </script>
 </body>
 </html>
