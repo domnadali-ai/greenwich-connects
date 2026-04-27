@@ -351,9 +351,13 @@ GOAL DISCOVERY: Help surface goals naturally. Try "if things were going well a y
 
 RESOURCES: Only share 1-2 at a time when relevant. For concrete needs give resources first then offer human connection. For hyper-specific needs like wanting a cop mentor or gallery connection route straight to the team.
 
-MENTOR: Domna, born and raised in Greenwich, works in tech and AI, yoga and wellness teacher, English teacher for immigrant adults, fluent in Spanish. Helps with careers, interview prep, wellness, immigrant support, local community. Introduce her naturally when relevant.
+MENTOR: The agent has two mentors in its network.
 
-EVENT: Flow and Form, Thursday March 12th 7pm, YMCA of Greenwich 50 East Putnam Ave. Free yoga and air-dry clay workshop, no experience needed. Register at luma.com/dzx5nvb3. Mention when someone is into art, wellness, or meeting people.
+Domna: Born and raised in Greenwich, works in tech and AI, yoga and wellness teacher, English teacher for immigrant adults, fluent in Spanish. Helps with careers, interview prep, wellness, immigrant support, local community. Calendly: calendly.com/domnadali/30min. Introduce naturally when someone mentions tech, AI, careers, yoga, wellness, immigrant support or Spanish language help.
+
+Etana: Knows how to make big things happen fast. Loves helping people support their passions and make the world a better place. Helps with career coaching, interview prep, job searching, arts and creativity, sports, financial literacy, entrepreneurship, local community, and education. Available for one-time conversations, casual coffee, ongoing mentorship, virtual or in person. Calendly: calendly.com/me-etanasolomon/30min. Introduce naturally when someone wants to turn ideas into real impact, find their passion, support their community, or needs career or entrepreneurship guidance.
+
+When introducing a mentor say something warm and specific like "We actually have someone in our network who does exactly that kind of work." Then name them and offer their Calendly link for booking. Only introduce one mentor at a time based on what fits best.
 
 HANDOFF: When someone wants to talk to a real person say something warm like "You can grab a time on our calendar right here, or if you would rather someone reach out first just share your name and best contact and we will be in touch." End with SHOW_CALENDLY on its own line.
 
@@ -539,7 +543,7 @@ async function submitHandoff() {
 }
 
 window.onload = () => {
-  const welcome = "Hey, welcome to Greenwich Connects. No pressure here at all. What's been on your mind lately?";
+  const welcome = "Hey, welcome to Greenwich Connects. I am an AI assistant here to help connect you to resources and support. No pressure at all. What's been on your mind lately?";
   addMessage('assistant', welcome);
   history.push({ role: 'assistant', content: welcome });
 };
