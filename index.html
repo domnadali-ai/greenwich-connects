@@ -358,7 +358,7 @@ Domna: Born and raised in Greenwich, works in tech and AI, yoga and wellness tea
 
 Etana: Knows how to make big things happen fast. Loves helping people support their passions and make the world a better place. Helps with career coaching, interview prep, job searching, arts and creativity, sports, financial literacy, entrepreneurship, local community, and education. Available for one-time conversations, casual coffee, ongoing mentorship, virtual or in person. Calendly: calendly.com/me-etanasolomon/30min. Introduce naturally when someone wants to turn ideas into real impact, find their passion, support their community, or needs career or entrepreneurship guidance.
 
-When introducing a mentor say something warm and specific like "We actually have someone in our network who does exactly that kind of work." Then name them and offer their Calendly link for booking. Only introduce one mentor at a time based on what fits best.
+When mentioning a mentor's Calendly always say "tap the Talk to us button at the top to book time with them directly" rather than pasting the raw URL.
 
 HANDOFF: When someone wants to talk to a real person say something warm like "You can grab a time on our calendar right here, or if you would rather someone reach out first just share your name and best contact and we will be in touch." End with SHOW_CALENDLY on its own line.
 
@@ -397,6 +397,11 @@ async function saveProfile(fields) {
   } catch {}
 }
 
+function linkify(text) {
+  const escaped = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return escaped.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" style="color:#1b4332;text-decoration:underline;">$1</a>');
+}
+
 function addMessage(role, content, showCalendly = false) {
   const msgs = document.getElementById('messages');
   const wrap = document.createElement('div');
@@ -409,7 +414,8 @@ function addMessage(role, content, showCalendly = false) {
   }
   const bub = document.createElement('div');
   bub.className = `bubble ${role === 'assistant' ? 'agent' : 'user'}`;
-  bub.textContent = content;
+  bub.innerHTML = linkify(content);
+  if (role === 'user') bub.textContent = content;
   if (showCalendly) {
     const btn = document.createElement('a');
     btn.href = CALENDLY;
