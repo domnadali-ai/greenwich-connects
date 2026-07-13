@@ -72,19 +72,45 @@ export default async function handler(req, res) {
     } catch { return res.status(200).json({ saved: false }); }
   }
 
-  // Log conversation to Airtable
+  // Log conversation to Airtable — create or update by SessionId
   if (body.logConversation) {
     try {
-      await fetch(`https://api.airtable.com/v0/${BASE}/Conversations`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${AIRTABLE_TOKEN}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ fields: body.logConversation })
-      });
+      const { SessionId, sessionLogged, ...fields } = body.logConversation;
+
+      if (!sessionLogged) {
+        // First message — create new row
+        await fetch(`https://api.airtable.com/v0/${BASE}/Conversations`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${AIRTABLE_TOKEN}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ fields: { SessionId, ...fields } })
+        });
+      } else {
+        // Subsequent messages — find and update existing row
+        const search = await fetch(
+          `https://api.airtable.com/v0/${BASE}/Conversations?filterByFormula={SessionId}="${SessionId}"`,
+          { headers: { Authorization: `Bearer ${AIRTABLE_TOKEN}` } }
+        );
+        const searchData = await search.json();
+        if (searchData.records && searchData.records.length > 0) {
+          const recordId = searchData.records[0].id;
+          await fetch(`https://api.airtable.com/v0/${BASE}/Conversations/${recordId}`, {
+            method: 'PATCH',
+            headers: {
+              Authorization: `Bearer ${AIRTABLE_TOKEN}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ fields })
+          });
+        }
+      }
       return res.status(200).json({ logged: true });
-    } catch { return res.status(200).json({ logged: false }); }
+    } catch (err) {
+      console.error('Airtable log error:', err.message);
+      return res.status(200).json({ logged: false });
+    }
   }
 
   // Chat with Claude — fetch live resources and events first
