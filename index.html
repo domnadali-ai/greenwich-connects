@@ -414,7 +414,11 @@ async function saveProfile(fields) {
 
 function linkify(text) {
   const escaped = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  return escaped.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" style="color:#1b4332;text-decoration:underline;">$1</a>');
+  // Match URLs with or without https://
+  return escaped.replace(/(https?:\/\/[^\s]+|(?<!\w)([a-zA-Z0-9-]+\.(?:com|org|net|gov|edu|io)(?:\/[^\s]*)?))(?=[^a-zA-Z0-9]|$)/g, (match) => {
+    const href = match.startsWith('http') ? match : 'https://' + match;
+    return `<a href="${href}" target="_blank" style="color:#1b4332;text-decoration:underline;">${match}</a>`;
+  });
 }
 
 function addMessage(role, content, showCalendly = false) {
@@ -523,40 +527,7 @@ async function sendMessage(text) {
     reply = reply.replace(/\nSHOW_CALENDLY/g, '').replace('SHOW_CALENDLY', '').trim();
 
   // Remove old beforeunload if exists
-  // Log to Airtable once per session on first agent response
-  if (!sessionLogged) {
-    sessionLogged = true;
-    const userMessages = history.filter(m => m.role === 'user').map(m => m.content).join(' ');
-    const allReplies = history.filter(m => m.role === 'assistant').map(m => m.content).join(' ');
-    const topics = [];
-    if (userMessages.match(/job|resume|work|career|employ/i)) topics.push('Career');
-    if (userMessages.match(/license|permit|driving|driver/i)) topics.push('Driving');
-    if (userMessages.match(/mental|anxiet|depress|therapy|counsel/i)) topics.push('Mental Health');
-    if (userMessages.match(/substance|drug|alcohol|drink|weed/i)) topics.push('Substance Use');
-    if (userMessages.match(/housing|homeless|shelter|rent/i)) topics.push('Housing');
-    if (userMessages.match(/food|hungry|eat|pantry/i)) topics.push('Food');
-    if (userMessages.match(/school|ged|college|tutor|english/i)) topics.push('Education');
-    if (userMessages.match(/legal|immigr|visa|citizen/i)) topics.push('Legal');
-    if (userMessages.match(/meet|people|friends|social/i)) topics.push('Social');
-    if (topics.length === 0) topics.push('General');
-    fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        logConversation: {
-          Date: new Date().toISOString().split('T')[0],
-          Topic: topics.join(', '),
-          AgeRange: '14-25',
-          Outcome: reply.slice(0, 200),
-          CrisisTriggered: allReplies.includes('988'),
-          MentorOffered: allReplies.includes('Domna') || allReplies.includes('Etana'),
-          CalendlyShown: showCalendly,
-          Language: 'English',
-          MessageCount: history.filter(m => m.role === 'user').length
-        }
-      })
-    }).catch(() => {});
-  }
+  // Remove inline logging — handled by beforeunload below
 
     addMessage('assistant', reply, showCalendly);
     history.push({ role: 'assistant', content: reply });
@@ -608,6 +579,49 @@ window.onload = () => {
   const welcome = "Hey, welcome to Greenwich Connects. I am an AI assistant here to help connect you to resources and support. No pressure at all. What's been on your mind lately?";
   addMessage('assistant', welcome);
   history.push({ role: 'assistant', content: welcome });
+
+  // Log full conversation when user leaves
+  window.addEventListener('pagehide', () => {
+    if (history.filter(m => m.role === 'user').length === 0) return;
+
+    const userMessages = history.filter(m => m.role === 'user').map(m => m.content).join(' ');
+    const allReplies = history.filter(m => m.role === 'assistant').map(m => m.content).join(' ');
+    const lastReply = history.filter(m => m.role === 'assistant').slice(-1)[0]?.content || '';
+
+    const topics = [];
+    if (userMessages.match(/job|resume|work|career|employ/i)) topics.push('Career');
+    if (userMessages.match(/license|permit|driving|driver/i)) topics.push('Driving');
+    if (userMessages.match(/mental|anxiet|depress|therapy|counsel/i)) topics.push('Mental Health');
+    if (userMessages.match(/substance|drug|alcohol|drink|weed/i)) topics.push('Substance Use');
+    if (userMessages.match(/housing|homeless|shelter|rent/i)) topics.push('Housing');
+    if (userMessages.match(/food|hungry|eat|pantry/i)) topics.push('Food');
+    if (userMessages.match(/school|ged|college|tutor|english/i)) topics.push('Education');
+    if (userMessages.match(/legal|immigr|visa|citizen/i)) topics.push('Legal');
+    if (userMessages.match(/meet|people|friends|social/i)) topics.push('Social');
+    if (topics.length === 0) topics.push('General');
+
+    // Find most useful reply — longest one is usually most resource-rich
+    const mostUsefulReply = history
+      .filter(m => m.role === 'assistant')
+      .sort((a, b) => b.content.length - a.content.length)[0]?.content || '';
+
+    const data = JSON.stringify({
+      logConversation: {
+        SessionId: sessionId,
+        Date: new Date().toISOString().split('T')[0],
+        Topic: topics.join(', '),
+        AgeRange: '14-25',
+        Outcome: mostUsefulReply.slice(0, 200),
+        CrisisTriggered: allReplies.includes('988'),
+        MentorOffered: allReplies.includes('Domna') || allReplies.includes('Etana'),
+        CalendlyShown: allReplies.includes('SHOW_CALENDLY') || allReplies.includes('Book a time'),
+        Language: 'English',
+        MessageCount: history.filter(m => m.role === 'user').length
+      }
+    });
+
+    navigator.sendBeacon('/api/chat', new Blob([data], { type: 'application/json' }));
+  });
 };
 </script>
 </body>
