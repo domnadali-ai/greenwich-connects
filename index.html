@@ -362,7 +362,8 @@ Under 14: Warm but flag immediately. Say something like "this program is designe
 
 Over 30: Before routing ask warmly "are you looking for support for yourself or for a young person in your life?" If for themselves offer gray zone resources. If for a young person or they are a parent offer full parent resources including Liberation Programs 203-399-3664, Family Centers 203-629-2822, JFS 203-622-1881, YMCA parent support groups, Kids in Crisis 203-661-1911, NAMI Connecticut at namict.org, Al-Anon at al-anon.org, Greenwich Dept of Human Services 203-622-3800.
 
-SUBSTANCE USE FLOW:
+WHEN SOMEONE WANTS TO MEET PEOPLE:
+Do not ask probing questions. Immediately mention Greenwich Connects events as the best way to meet people and offer to connect them with the team. Say something like "Greenwich Connects hosts free events around Greenwich — it is honestly one of the best ways to meet people in a low pressure setting. Want me to connect you with someone from our team who can tell you what is coming up?" Then end with SHOW_CALENDLY.
 When someone says they need help with substance use, drinking, drugs, or addiction do NOT ask probing questions. They came for help so give it immediately.
 
 Respond warmly and directly: "Reaching out is the hardest part and you just did it. Here are two local programs that are confidential and judgment free." Then share Liberation Programs at liberationprograms.org, phone 203-399-3664, and Positive Directions at positivedirections.org, phone 203-227-7644. Then offer "Want to also connect with someone from our team? They can help you figure out the right next step." Then end with SHOW_CALENDLY.
@@ -521,42 +522,41 @@ async function sendMessage(text) {
     const showCalendly = reply.includes('SHOW_CALENDLY');
     reply = reply.replace(/\nSHOW_CALENDLY/g, '').replace('SHOW_CALENDLY', '').trim();
 
-  // Log conversation to Airtable — one row per session
-  const userMessages = history.filter(m => m.role === 'user').map(m => m.content).join(' ');
-  const crisisTriggered = reply.includes('988') || reply.includes('Crisis Text Line');
-  const mentorOffered = reply.includes('Domna') || reply.includes('Etana');
-  const calendlyShown = showCalendly;
-
-  const topics = [];
-  if (userMessages.match(/job|resume|work|career|employ/i)) topics.push('Career');
-  if (userMessages.match(/license|permit|driving|driver/i)) topics.push('Driving');
-  if (userMessages.match(/mental|anxiet|depress|therapy|counsel/i)) topics.push('Mental Health');
-  if (userMessages.match(/substance|drug|alcohol|drink|weed/i)) topics.push('Substance Use');
-  if (userMessages.match(/housing|homeless|shelter|rent/i)) topics.push('Housing');
-  if (userMessages.match(/food|hungry|eat|pantry/i)) topics.push('Food');
-  if (userMessages.match(/school|ged|college|tutor|english/i)) topics.push('Education');
-  if (userMessages.match(/legal|immigr|visa|citizen/i)) topics.push('Legal');
-  if (topics.length === 0) topics.push('General');
-
-  fetch('/api/chat', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      logConversation: {
-        SessionId: sessionId,
-        Date: new Date().toISOString().split('T')[0],
-        Topic: topics.join(', '),
-        AgeRange: '14-25',
-        Outcome: reply.slice(0, 200),
-        CrisisTriggered: crisisTriggered,
-        MentorOffered: mentorOffered,
-        CalendlyShown: calendlyShown,
-        Language: 'English',
-        MessageCount: history.filter(m => m.role === 'user').length,
-        sessionLogged: sessionLogged
-      }
-    })
-  }).then(() => { sessionLogged = true; }).catch(() => {});
+  // Remove old beforeunload if exists
+  // Log to Airtable once per session on first agent response
+  if (!sessionLogged) {
+    sessionLogged = true;
+    const userMessages = history.filter(m => m.role === 'user').map(m => m.content).join(' ');
+    const allReplies = history.filter(m => m.role === 'assistant').map(m => m.content).join(' ');
+    const topics = [];
+    if (userMessages.match(/job|resume|work|career|employ/i)) topics.push('Career');
+    if (userMessages.match(/license|permit|driving|driver/i)) topics.push('Driving');
+    if (userMessages.match(/mental|anxiet|depress|therapy|counsel/i)) topics.push('Mental Health');
+    if (userMessages.match(/substance|drug|alcohol|drink|weed/i)) topics.push('Substance Use');
+    if (userMessages.match(/housing|homeless|shelter|rent/i)) topics.push('Housing');
+    if (userMessages.match(/food|hungry|eat|pantry/i)) topics.push('Food');
+    if (userMessages.match(/school|ged|college|tutor|english/i)) topics.push('Education');
+    if (userMessages.match(/legal|immigr|visa|citizen/i)) topics.push('Legal');
+    if (userMessages.match(/meet|people|friends|social/i)) topics.push('Social');
+    if (topics.length === 0) topics.push('General');
+    fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        logConversation: {
+          Date: new Date().toISOString().split('T')[0],
+          Topic: topics.join(', '),
+          AgeRange: '14-25',
+          Outcome: reply.slice(0, 200),
+          CrisisTriggered: allReplies.includes('988'),
+          MentorOffered: allReplies.includes('Domna') || allReplies.includes('Etana'),
+          CalendlyShown: showCalendly,
+          Language: 'English',
+          MessageCount: history.filter(m => m.role === 'user').length
+        }
+      })
+    }).catch(() => {});
+  }
 
     addMessage('assistant', reply, showCalendly);
     history.push({ role: 'assistant', content: reply });
