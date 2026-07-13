@@ -552,9 +552,9 @@ async function sendMessage(text) {
         MentorOffered: mentorOffered,
         CalendlyShown: calendlyShown,
         Language: 'English',
-        MessageCount: history.filter(m => m.role === 'user').length
-      },
-      sessionLogged
+        MessageCount: history.filter(m => m.role === 'user').length,
+        sessionLogged: sessionLogged
+      }
     })
   }).then(() => { sessionLogged = true; }).catch(() => {});
 
