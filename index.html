@@ -527,7 +527,19 @@ async function sendMessage(text) {
     reply = reply.replace(/\nSHOW_CALENDLY/g, '').replace('SHOW_CALENDLY', '').trim();
 
   // Remove old beforeunload if exists
-  // Remove inline logging — handled by beforeunload below
+  // Show "Send me my plan" button after 2nd user message
+  if (history.filter(m => m.role === 'user').length === 2) {
+    const msgs = document.getElementById('messages');
+    const planWrap = document.createElement('div');
+    planWrap.id = 'plan-prompt';
+    planWrap.style.cssText = 'display:flex;align-items:center;gap:8px;padding:4px 0;';
+    planWrap.innerHTML = `
+      <input id="plan-contact" placeholder="Your email or phone" style="flex:1;border:1.5px solid #b7e4c7;border-radius:18px;padding:8px 14px;font-size:13px;outline:none;font-family:inherit;background:#f8faf9;">
+      <button onclick="sendPlan()" style="background:linear-gradient(135deg,#1b4332,#2d6a4f);color:#fff;border:none;border-radius:18px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;">Send me my plan</button>
+    `;
+    msgs.appendChild(planWrap);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
 
     addMessage('assistant', reply, showCalendly);
     history.push({ role: 'assistant', content: reply });
@@ -546,6 +558,34 @@ function autoResize(el) {
   el.style.height = 'auto';
   el.style.height = el.scrollHeight + 'px';
   document.getElementById('sendBtn').disabled = !el.value.trim();
+}
+
+async function sendPlan() {
+  const contact = document.getElementById('plan-contact')?.value.trim();
+  if (!contact) return;
+
+  const userMessages = history.filter(m => m.role === 'user').map(m => m.content).join(', ');
+  const resources = history.filter(m => m.role === 'assistant')
+    .map(m => m.content)
+    .sort((a, b) => b.length - a.length)[0] || '';
+
+  document.getElementById('plan-prompt')?.remove();
+
+  try {
+    await fetch(FORMSPREE, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contact,
+        subject: 'Your next steps from Greenwich Connects',
+        message: `Hi! Here is a summary from your Greenwich Connects conversation.\n\nWhat you came in for: ${userMessages}\n\nResources and next steps:\n${resources}\n\nQuestions? Visit greenwichconnects.vercel.app or tap Talk to us to book time with our team.`,
+        source: 'Next Steps Export'
+      })
+    });
+    addMessage('assistant', `Done! We sent your next steps to ${contact}. You can always come back here if you need anything else.`);
+  } catch {
+    addMessage('assistant', "Something went wrong sending that. Try again in a second.");
+  }
 }
 
 function toggleCats() { document.getElementById('cats').classList.toggle('open'); }
