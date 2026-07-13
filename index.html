@@ -398,6 +398,8 @@ RESOURCES by category, share 1-2 at a time only. Use the live resource database 
 
 let history = [];
 let profileSaved = false;
+let sessionId = 'sess_' + Math.random().toString(36).substr(2, 9);
+let sessionLogged = false;
 
 async function saveProfile(fields) {
   try {
@@ -519,41 +521,42 @@ async function sendMessage(text) {
     const showCalendly = reply.includes('SHOW_CALENDLY');
     reply = reply.replace(/\nSHOW_CALENDLY/g, '').replace('SHOW_CALENDLY', '').trim();
 
-  // Auto log conversation to Airtable every 4 messages
-  if (history.filter(m => m.role === 'user').length % 4 === 0) {
-    const userMessages = history.filter(m => m.role === 'user').map(m => m.content).join(' ');
-    const crisisTriggered = reply.includes('988') || reply.includes('Crisis Text Line');
-    const mentorOffered = reply.includes('Domna') || reply.includes('Etana');
-    const calendlyShown = showCalendly;
-    
-    const topics = [];
-    if (userMessages.match(/job|resume|work|career|employ/i)) topics.push('Career');
-    if (userMessages.match(/license|permit|driving|driver/i)) topics.push('Driving');
-    if (userMessages.match(/mental|anxiet|depress|therapy|counsel/i)) topics.push('Mental Health');
-    if (userMessages.match(/substance|drug|alcohol|drink|weed/i)) topics.push('Substance Use');
-    if (userMessages.match(/housing|homeless|shelter|rent/i)) topics.push('Housing');
-    if (userMessages.match(/food|hungry|eat|pantry/i)) topics.push('Food');
-    if (userMessages.match(/school|ged|college|tutor|english/i)) topics.push('Education');
-    if (userMessages.match(/legal|immigr|visa|citizen/i)) topics.push('Legal');
-    if (topics.length === 0) topics.push('General');
+  // Log conversation to Airtable — one row per session
+  const userMessages = history.filter(m => m.role === 'user').map(m => m.content).join(' ');
+  const crisisTriggered = reply.includes('988') || reply.includes('Crisis Text Line');
+  const mentorOffered = reply.includes('Domna') || reply.includes('Etana');
+  const calendlyShown = showCalendly;
 
-    fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        logConversation: {
-          Date: new Date().toISOString().split('T')[0],
-          Topic: topics.join(', '),
-          AgeRange: '14-25',
-          Outcome: reply.slice(0, 200),
-          CrisisTriggered: crisisTriggered,
-          MentorOffered: mentorOffered,
-          CalendlyShown: calendlyShown,
-          Language: 'English'
-        }
-      })
-    }).catch(() => {});
-  }
+  const topics = [];
+  if (userMessages.match(/job|resume|work|career|employ/i)) topics.push('Career');
+  if (userMessages.match(/license|permit|driving|driver/i)) topics.push('Driving');
+  if (userMessages.match(/mental|anxiet|depress|therapy|counsel/i)) topics.push('Mental Health');
+  if (userMessages.match(/substance|drug|alcohol|drink|weed/i)) topics.push('Substance Use');
+  if (userMessages.match(/housing|homeless|shelter|rent/i)) topics.push('Housing');
+  if (userMessages.match(/food|hungry|eat|pantry/i)) topics.push('Food');
+  if (userMessages.match(/school|ged|college|tutor|english/i)) topics.push('Education');
+  if (userMessages.match(/legal|immigr|visa|citizen/i)) topics.push('Legal');
+  if (topics.length === 0) topics.push('General');
+
+  fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      logConversation: {
+        SessionId: sessionId,
+        Date: new Date().toISOString().split('T')[0],
+        Topic: topics.join(', '),
+        AgeRange: '14-25',
+        Outcome: reply.slice(0, 200),
+        CrisisTriggered: crisisTriggered,
+        MentorOffered: mentorOffered,
+        CalendlyShown: calendlyShown,
+        Language: 'English',
+        MessageCount: history.filter(m => m.role === 'user').length
+      },
+      sessionLogged
+    })
+  }).then(() => { sessionLogged = true; }).catch(() => {});
 
     addMessage('assistant', reply, showCalendly);
     history.push({ role: 'assistant', content: reply });
