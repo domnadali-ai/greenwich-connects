@@ -75,29 +75,44 @@ export default async function handler(req, res) {
   // Log conversation to Airtable — create or update by SessionId
   if (body.logConversation) {
     try {
-      const { SessionId, sessionLogged, ...fields } = body.logConversation;
+      const { sessionLogged, ...fields } = body.logConversation;
+      const sessionId = fields.SessionId;
 
       if (!sessionLogged) {
         // First message — create new row
+        console.log('Creating new session:', sessionId);
         await fetch(`https://api.airtable.com/v0/${BASE}/Conversations`, {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${AIRTABLE_TOKEN}`,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ fields: { SessionId, ...fields } })
+          body: JSON.stringify({ fields })
         });
       } else {
         // Subsequent messages — find and update existing row
+        console.log('Updating session:', sessionId);
         const search = await fetch(
-          `https://api.airtable.com/v0/${BASE}/Conversations?filterByFormula={SessionId}="${SessionId}"`,
+          `https://api.airtable.com/v0/${BASE}/Conversations?filterByFormula=SessionId%3D%22${encodeURIComponent(sessionId)}%22`,
           { headers: { Authorization: `Bearer ${AIRTABLE_TOKEN}` } }
         );
         const searchData = await search.json();
+        console.log('Search result:', JSON.stringify(searchData));
         if (searchData.records && searchData.records.length > 0) {
           const recordId = searchData.records[0].id;
+          const { SessionId, ...updateFields } = fields;
           await fetch(`https://api.airtable.com/v0/${BASE}/Conversations/${recordId}`, {
             method: 'PATCH',
+            headers: {
+              Authorization: `Bearer ${AIRTABLE_TOKEN}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ fields: updateFields })
+          });
+        } else {
+          console.log('Session not found, creating new row');
+          await fetch(`https://api.airtable.com/v0/${BASE}/Conversations`, {
+            method: 'POST',
             headers: {
               Authorization: `Bearer ${AIRTABLE_TOKEN}`,
               'Content-Type': 'application/json'
