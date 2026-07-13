@@ -75,8 +75,8 @@ export default async function handler(req, res) {
   // Log conversation to Airtable — create or update by SessionId
   if (body.logConversation) {
     try {
-      const { sessionLogged, ...fields } = body.logConversation;
-      const sessionId = fields.SessionId;
+      const { sessionLogged, SessionId, ...fields } = body.logConversation;
+      const sessionId = SessionId;
 
       if (!sessionLogged) {
         // First message — create new row
