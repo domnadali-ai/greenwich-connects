@@ -494,8 +494,11 @@ async function sendMessage(text) {
 
     if (data.error) {
       const msg = JSON.stringify(data.error);
+      console.error('API error details:', msg);
       if (msg.includes('overloaded')) {
         addMessage('assistant', "We are a little backed up right now. Give it a minute and try again, I will be right here.");
+      } else if (msg.includes('too long') || msg.includes('token')) {
+        addMessage('assistant', "Something went wrong on my end. Try sending a shorter message.");
       } else {
         addMessage('assistant', "Something came up on my end. Try sending that again in a second.");
       }
