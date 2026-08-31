@@ -15,13 +15,35 @@ export default async function handler(req, res) {
       const url = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv`;
       const r = await fetch(url);
       const text = await r.text();
-      const rows = text.trim().split('\n').map(row =>
-        row.split(',').map(cell => cell.replace(/^"|"$/g, '').trim())
-      );
-      const headers = rows[0];
-      return rows.slice(1).map(row => {
+
+      function parseCSVLine(line) {
+        const fields = [];
+        let field = '';
+        let inQuotes = false;
+        for (let i = 0; i < line.length; i++) {
+          const ch = line[i];
+          if (ch === '"') {
+            if (inQuotes && line[i+1] === '"') { field += '"'; i++; }
+            else inQuotes = !inQuotes;
+          } else if (ch === ',' && !inQuotes) {
+            fields.push(field.trim());
+            field = '';
+          } else {
+            field += ch;
+          }
+        }
+        fields.push(field.trim());
+        return fields;
+      }
+
+      const lines = text.split(/\r?\n/).filter(l => l.trim());
+      const headers = parseCSVLine(lines[0]);
+      return lines.slice(1).map(line => {
+        const values = parseCSVLine(line);
         const obj = {};
-        headers.forEach((h, i) => obj[h] = row[i] || '');
+        headers.forEach((h, i) => {
+          obj[h.trim()] = (values[i] || '').trim();
+        });
         return obj;
       });
     } catch { return []; }
@@ -72,55 +94,17 @@ export default async function handler(req, res) {
     } catch { return res.status(200).json({ saved: false }); }
   }
 
-  // Log conversation to Airtable — create or update by SessionId
+  // Log conversation to Airtable
   if (body.logConversation) {
     try {
-      const { sessionLogged, SessionId, ...fields } = body.logConversation;
-      const sessionId = SessionId;
-
-      if (!sessionLogged) {
-        // First message — create new row
-        console.log('Creating new session:', sessionId);
-        await fetch(`https://api.airtable.com/v0/${BASE}/Conversations`, {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${AIRTABLE_TOKEN}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ fields })
-        });
-      } else {
-        // Subsequent messages — find and update existing row
-        console.log('Updating session:', sessionId);
-        const search = await fetch(
-          `https://api.airtable.com/v0/${BASE}/Conversations?filterByFormula=SessionId%3D%22${encodeURIComponent(sessionId)}%22`,
-          { headers: { Authorization: `Bearer ${AIRTABLE_TOKEN}` } }
-        );
-        const searchData = await search.json();
-        console.log('Search result:', JSON.stringify(searchData));
-        if (searchData.records && searchData.records.length > 0) {
-          const recordId = searchData.records[0].id;
-          const { SessionId, ...updateFields } = fields;
-          await fetch(`https://api.airtable.com/v0/${BASE}/Conversations/${recordId}`, {
-            method: 'PATCH',
-            headers: {
-              Authorization: `Bearer ${AIRTABLE_TOKEN}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ fields: updateFields })
-          });
-        } else {
-          console.log('Session not found, creating new row');
-          await fetch(`https://api.airtable.com/v0/${BASE}/Conversations`, {
-            method: 'POST',
-            headers: {
-              Authorization: `Bearer ${AIRTABLE_TOKEN}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ fields })
-          });
-        }
-      }
+      await fetch(`https://api.airtable.com/v0/${BASE}/Conversations`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${AIRTABLE_TOKEN}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ fields: body.logConversation })
+      });
       return res.status(200).json({ logged: true });
     } catch (err) {
       console.error('Airtable log error:', err.message);
