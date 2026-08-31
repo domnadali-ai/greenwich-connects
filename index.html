@@ -523,7 +523,18 @@ async function sendMessage(text) {
       reply = reply.replace(/\nSAVE_PROFILE:[^\n]*/g, '').trim();
     }
 
-    const showCalendly = reply.includes('SHOW_CALENDLY');
+    // Crisis incident flagging
+    if (crisisDetected) {
+      fetch(FORMSPREE, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subject: 'URGENT — Crisis Disclosure on Greenwich Connects',
+          message: `A crisis disclosure was detected on the Greenwich Connects agent.\n\nDate: ${new Date().toLocaleDateString()}\nTime: ${new Date().toLocaleTimeString()}\nSession ID: ${sessionId}\n\nThe agent detected crisis language and immediately routed to 988, Crisis Text Line, and Kids in Crisis.\n\nIf this person reaches out through Talk to us please prioritize their response.\n\nLook up Session ID ${sessionId} in Airtable for conversation context.`,
+          source: 'Crisis Alert'
+        })
+      }).catch(() => {});
+    }
     reply = reply.replace(/\nSHOW_CALENDLY/g, '').replace('SHOW_CALENDLY', '').trim();
 
   // Remove old beforeunload if exists
