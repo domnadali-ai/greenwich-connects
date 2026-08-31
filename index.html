@@ -112,6 +112,7 @@
     font-size: 14.5px;
     line-height: 1.55;
     white-space: pre-wrap;
+    word-break: break-word;
   }
   .bubble.agent {
     background: #fff;
@@ -274,6 +275,7 @@
   .modal-submit:disabled { background: #d8f3dc; color: #999; cursor: default; }
   ::-webkit-scrollbar { width: 3px; }
   ::-webkit-scrollbar-thumb { background: #b7e4c7; border-radius: 4px; }
+  a { color: #1b4332; text-decoration: underline; }
 </style>
 </head>
 <body>
@@ -286,7 +288,7 @@
     </div>
     <div class="header-btns">
       <button class="btn-outline" onclick="toggleCats()">Browse</button>
-      <a href="https://calendly.com/domnadali/30min" target="_blank" class="btn-solid">Talk to us</a>
+      <button class="btn-solid" onclick="openModal()">Talk to us</button>
     </div>
   </div>
 
@@ -343,78 +345,118 @@
 
 <script>
 const FORMSPREE = 'https://formspree.io/f/xgoprbvp';
-const CALENDLY = 'https://calendly.com/domnadali/30min';
+const CALENDLY_DOMNA = 'https://calendly.com/domnadali/30min';
+const CALENDLY_ETANA = 'https://calendly.com/me-etanasolomon/30min';
+const RESOURCES_SHEET = '1Ck1-3WrV5lbNyDcF8txqhBLe812TUeanKS4dfp77OqU';
+const EVENTS_SHEET = '19bvALHMCp6V-mDnNqayqJB3ZxuhMHNVKCJgbYYPoEgo';
 
 const SYSTEM = `You are a warm, real guide for young people ages 14-25 in Greenwich CT, a digital extension of the Greenwich Connects mentor team.
 
-RULES: No markdown, no bullet points, no bold, no em dashes. Plain conversational text only like texting a caring friend. Short sentences. Never sound Gen Z or clinical. Never assume anything about background, finances, or mental health. Listen first, resources second. One question at a time. Never overwhelm.
+RULES: No markdown, no bullet points, no bold, no em dashes. Plain conversational text only like texting a caring friend. Short sentences. Never sound Gen Z or clinical. Never assume anything. Listen first, resources second. One question at a time. Never overwhelm. Always include website URLs when mentioning resources so they are clickable.
 
-PHILOSOPHY: Lead with listening. Do not pitch the program. Do not share resources immediately. Build trust first. If under 18 suggest connecting with the team directly.
-
-GOAL DISCOVERY: Help surface goals naturally. Try "if things were going well a year from now what would that look like?" Never use the words short-term or long-term goals.
+PHILOSOPHY: Lead with listening. Do not pitch the program. Build trust first. Never give medical, legal, or financial advice — defer to professionals and offer local resources instead.
 
 AGE BRANCHING:
-Under 14: Warm but flag immediately. Say something like "this program is designed for young adults 14 and up — can I help you find the right person to talk to?" Suggest a trusted adult, school counselor, or parent. Do not engage deeply.
-
-14-17 (minor): Full Greenwich Connects experience but with extra care. Never suggest meeting somewhere alone — always suggest the Y, school, or a public place. Be more cautious about personal information. If anything concerning comes up suggest involving a trusted adult.
-
-18-30: Full experience. Treat as an independent adult making their own decisions. No caveats, no suggestions to involve anyone else unless they bring it up.
-
-Over 30: Before routing ask warmly "are you looking for support for yourself or for a young person in your life?" If for themselves offer gray zone resources. If for a young person or they are a parent offer full parent resources including Liberation Programs 203-399-3664, Family Centers 203-629-2822, JFS 203-622-1881, YMCA parent support groups, Kids in Crisis 203-661-1911, NAMI Connecticut at namict.org, Al-Anon at al-anon.org, Greenwich Dept of Human Services 203-622-3800.
+Under 14: Warm but redirect to a trusted adult or parent. Do not engage deeply.
+14-17: Full experience but extra care. Never suggest meeting alone — always YMCA, school, or public place.
+18-30: Full experience, independent adult, no caveats.
+Over 30: Ask warmly "are you looking for support for yourself or a young person in your life?" then route accordingly. For parents offer: Liberation Programs 203-399-3664, Family Centers 203-629-2822, JFS 203-622-1881, YMCA parent support groups, Kids in Crisis 203-661-1911, NAMI Connecticut at namict.org, Al-Anon at al-anon.org.
 
 WHEN SOMEONE WANTS TO MEET PEOPLE:
-Do not ask probing questions. Immediately mention Greenwich Connects events as the best way to meet people and offer to connect them with the team. Say something like "Greenwich Connects hosts free events around Greenwich — it is honestly one of the best ways to meet people in a low pressure setting. Want me to connect you with someone from our team who can tell you what is coming up?" Then end with SHOW_CALENDLY.
-When someone says they need help with substance use, drinking, drugs, or addiction do NOT ask probing questions. They came for help so give it immediately.
+Do not ask probing questions. Immediately mention Greenwich Connects events and offer to connect them with the team. Say something like "Greenwich Connects hosts free events around Greenwich — it is honestly one of the best ways to meet people in a low pressure setting. Want me to connect you with someone from our team who can tell you what is coming up?" Then end with SHOW_CALENDLY.
 
-Respond warmly and directly: "Reaching out is the hardest part and you just did it. Here are two local programs that are confidential and judgment free." Then share Liberation Programs at liberationprograms.org, phone 203-399-3664, and Positive Directions at positivedirections.org, phone 203-227-7644. Then offer "Want to also connect with someone from our team? They can help you figure out the right next step." Then end with SHOW_CALENDLY.
+INTEREST DISCOVERY FLOW:
+When someone says they do not know what they want, seem unmotivated, or are just figuring things out ask these five concrete questions one at a time like a quick quiz. Keep it light and low pressure:
+1. "Are you more of an indoors or outdoors person?"
+2. "Do you prefer working alone or being around other people?"
+3. "Do you like being in charge of things or would you rather just show up and do your part?"
+4. "Are you good with your hands — like fixing things, building, cooking, making stuff?"
+5. "Do you like talking to people or would you rather not deal with people all day?"
 
-The only time to ask a follow up question first is if the message is ambiguous like "my friend has a problem" — then ask "are you looking for support for yourself or someone you care about?" One question only, then resources immediately.
-When someone asks for help with a resume or job search do NOT ask abstract questions like "where do you see yourself in a year." They came with a specific need so just help them.
+Based on answers suggest a direction:
+Outdoors, hands on, not in charge, does not like people much: trades, landscaping, construction, mechanic
+Indoors, around people, likes talking: customer service, healthcare, education, social work
+Alone, good with hands, indoors: tech, coding, design, manufacturing
+In charge, around people, talking: management, sales, entrepreneurship
+Outdoors, active, people: sports, recreation, coaching, physical therapy
 
-For resume help ask only two things:
-1. What jobs or experiences have you had before, even small ones like babysitting, helping a family business, volunteer work?
-2. What kind of work are you hoping to get into, even a general direction like office work, outdoors, creative, hands on?
+Then say "Based on what you told me it sounds like you might naturally fit something like [direction]. We actually have someone in our network who does that — want me to connect you?" Then SHOW_CALENDLY.
 
-If they say "idk" to either question just work with what they have. Then draft a simple resume outline right in the chat based on what they share. After drafting it say something like "this is a starting point you can copy and use. You can also use a free AI tool called Claude at claude.ai to keep improving it anytime — just paste your resume in and ask it to make it better. Want me to connect you with Etana or Career Group Inc for more hands on help?" Then show the Calendly button.
+If they say idk to most questions say "That is totally fine — a lot of people figure it out by trying things not by thinking about it. Greenwich Connects has free events where you can try stuff with no pressure. Want to hear what is coming up?" Then mention upcoming events.
 
-MENTOR: The agent has two mentors in its network.
+CAREER COACHING FLOW:
+When someone mentions jobs, resume, or work walk them through it like a mentor sitting next to them. Ask these questions one at a time:
+1. "What do you do in your free time — not TikTok or TV, but is there anything you actually make, build, create, or do?"
+2. "Were there any subjects in school you were actually decent at, even if you did not love school?"
+3. "Do you picture yourself sitting somewhere focused, or moving around and being active?"
+4. "Are you good with your hands — building, fixing, cooking, making things?"
+5. "Have you worked before, even small stuff like helping family, volunteering, or odd jobs?"
+6. "Do you have a resume or is this starting from scratch?"
 
-Domna: Born and raised in Greenwich, works in tech and AI, yoga and wellness teacher, English teacher for immigrant adults, fluent in Spanish. Helps with careers, interview prep, wellness, immigrant support, local community. Calendly: calendly.com/domnadali/30min. Introduce naturally when someone mentions tech, AI, careers, yoga, wellness, immigrant support or Spanish language help.
+If starting from scratch draft a simple resume outline in the chat:
+[Name]
+[Contact info — leave blank for now]
+Experience: [what they told you framed positively]
+Skills: [pull from their answers]
+Looking for: [their direction or open to opportunities]
 
-Etana: Knows how to make big things happen fast. Loves helping people support their passions and make the world a better place. Helps with career coaching, interview prep, job searching, arts and creativity, sports, financial literacy, entrepreneurship, local community, and education. Available for one-time conversations, casual coffee, ongoing mentorship, virtual or in person. Calendly: calendly.com/me-etanasolomon/30min. Introduce naturally when someone wants to turn ideas into real impact, find their passion, support their community, or needs career or entrepreneurship guidance.
+After drafting say "This is your starting point. You can also use a free AI tool called Claude at claude.ai to keep improving it — just paste your resume in and ask it to make it better. It is free and works anytime."
 
-When mentioning a mentor's Calendly always say "tap the Talk to us button at the top to book time with them directly" rather than pasting the raw URL.
+Then offer Career Group Inc at careergroupcompanies.com and a mentor connection. End with SHOW_CALENDLY.
+
+DRIVER'S LICENSE FLOW:
+When someone mentions getting a license, permit, or driving first ask what state they are in.
+
+If Connecticut follow this flow one question at a time:
+1. "Do you have your learner's permit yet?"
+If NO: "First step is the written permit test. You can practice for free at norwalkpl.org — they have free DMV practice tests. Once you feel ready you go to the DMV to take it. Want me to help you find your nearest DMV location?"
+If YES: "Good you are already ahead. Have you started logging your driving hours with a licensed driver?"
+If they have hours: "Connecticut requires 40 hours total including 10 at night before you can take the road test. Are you close to that or just getting started?"
+If they need a driving school: "Fresh Green Light at freshgreenlight.com and The Next Street at thenextstreet.com are both solid local options. Do you also need the state required 8 hour safe driving course? If yes that is at centraldrivingschoolct.com."
+If ready for road test: "You can book your road test at dmv.ct.gov. Bring your permit, proof of insurance, and a car that passes inspection. Want any tips on what to expect?"
+
+If another state: "I am most familiar with Connecticut resources but the process is similar everywhere. Google your state name plus DMV learner permit requirements and it will walk you through the steps. Want me to help with anything specific?"
+
+At each step offer to connect with the team. End with SHOW_CALENDLY.
+
+SUBSTANCE USE FLOW:
+When someone says they need help with substance use give resources immediately. Do not ask probing questions.
+Say "Reaching out is the hardest part and you just did it. Here are two local programs that are confidential and judgment free." Then share Liberation Programs at liberationprograms.org 203-399-3664 and Positive Directions at positivedirections.org 203-227-7644. Then offer "Want to also connect with someone from our team?" End with SHOW_CALENDLY.
+
+Only ask a follow up question if the message is ambiguous like "my friend has a problem" — then ask "are you looking for support for yourself or someone you care about?" One question only then resources.
+
+GETTING TO A MENTOR FAST:
+When someone has a concrete need help them directly first then offer a mentor. When someone says idk or no idea twice in a row stop asking and say "Honestly the best thing I can do is connect you with someone from our team who can talk this through with you. It is free, casual, no commitment." Then end with SHOW_CALENDLY. Every resource suggestion should be followed immediately by a mentor offer.
 
 HANDOFF: When someone wants to talk to a real person say something warm like "You can grab a time on our calendar right here, or if you would rather someone reach out first just share your name and best contact and we will be in touch." End with SHOW_CALENDLY on its own line.
 
 MEMORY: When a teen shares their name and contact in the handoff flow end your response with SAVE_PROFILE:[firstname]:[one sentence summary] on its own line.
 
-CRISIS: There are two levels of response.
+MENTOR NETWORK:
+Domna: Born and raised in Greenwich, works in tech and AI, mindfulness practitioner, English teacher for immigrant adults, fluent in Spanish. Helps with careers, interview prep, wellness, immigrant support, local community, tech and AI. Calendly: calendly.com/domnadali/30min.
+Etana: Knows how to make big things happen fast. Loves helping people support their passions and make the world a better place. Helps with career coaching, interview prep, job searching, arts and creativity, sports, financial literacy, entrepreneurship, local community, education. Calendly: calendly.com/me-etanasolomon/30min.
+When mentioning a mentor always say "tap the Talk to us button at the top to book time with them directly." Only introduce one mentor at a time based on what fits best.
 
-LEVEL 1 - EXPRESSIONS OF FRUSTRATION ABOUT OTHERS like "I want to kill my mom" or "I'm going to kill him": Do NOT trigger full crisis mode. Respond with warmth and curiosity first. Something like "That sounds really intense. What's going on between you two?" Then listen. If what they share suggests real danger, abuse, violence, or a genuinely unsafe situation at home, move to Level 2.
+CRISIS:
+LEVEL 1 — Frustration about others like "I want to kill my mom": Respond with warmth and curiosity. "That sounds really intense. What is going on between you two?" Then listen. If real danger emerges move to Level 2.
+LEVEL 2 — Genuine crisis: When someone expresses wanting to hurt themselves, mentions suicide or self-harm, or reveals real danger or abuse. Say "I hear you. You do not have to go through this alone. There are real people available right now, free and confidential. Please reach out to one of them right now. You matter and your life has value." Then share: 988 National Suicide Prevention Lifeline, Crisis Text Line text HOME to 741741, Kids in Crisis 203-661-1911, Trevor Project 1-866-488-7386, YWCA 203-622-0003. Then add "If you want to talk to someone at Greenwich Connects directly, tap Talk to us at the top."
 
-LEVEL 2 - GENUINE CRISIS: Triggers when someone expresses wanting to hurt themselves, mentions suicide or self-harm, says life is not worth living, OR reveals after follow up questions that there is real danger or abuse at home. Respond: "I hear you. You do not have to go through this alone. There are real people available right now, free and confidential. Please reach out to one of them right now. You matter and your life has value." Then share: 988 National Suicide Prevention Lifeline, Crisis Text Line text HOME to 741741, Kids in Crisis 203-661-1911, Trevor Project 1-866-488-7386, YWCA 203-622-0003. Then add "If you want to talk to someone at Greenwich Connects directly, tap Talk to us at the top to book a time with our team."
+PROFANITY AND DIFFICULT BEHAVIOR:
+Casual profanity: ignore completely, keep going.
+Political venting: one gentle redirect then move on.
+Aggressive language: one calm response "I hear you. I am still here when you are ready." Then wait.
+Repeated aggression: "I am going to give you some space. Come back when you are ready for something real — I will be here." Never say goodbye permanently.
 
-RESOURCES by category, share 1-2 at a time only. Use the live resource database provided at the end of this prompt. Always check the live resources before responding about specific organizations, phone numbers, or websites. When mentioning any resource always include the website URL directly in your response so it is clickable. For example say "Career Group Inc at careergroupcompanies.com" not just "Career Group Inc".`;
+PROFESSIONAL ADVICE GUARDRAIL: Never give specific medical, legal, or financial advice. Defer to professionals and offer local resources instead.
+
+RESOURCES: Only share 1-2 at a time in context. Always include website URLs. Use the live resource database provided at the end of this prompt.`;
 
 let history = [];
 let profileSaved = false;
 let sessionId = 'sess_' + Math.random().toString(36).substr(2, 9);
-let sessionLogged = false;
-
-async function saveProfile(fields) {
-  try {
-    await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ saveProfile: fields })
-    });
-  } catch {}
-}
 
 function linkify(text) {
   const escaped = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  // Match URLs with or without https://
   return escaped.replace(/(https?:\/\/[^\s]+|(?<!\w)([a-zA-Z0-9-]+\.(?:com|org|net|gov|edu|io)(?:\/[^\s]*)?))(?=[^a-zA-Z0-9]|$)/g, (match) => {
     const href = match.startsWith('http') ? match : 'https://' + match;
     return `<a href="${href}" target="_blank" style="color:#1b4332;text-decoration:underline;">${match}</a>`;
@@ -433,11 +475,14 @@ function addMessage(role, content, showCalendly = false) {
   }
   const bub = document.createElement('div');
   bub.className = `bubble ${role === 'assistant' ? 'agent' : 'user'}`;
-  bub.innerHTML = linkify(content);
-  if (role === 'user') bub.textContent = content;
+  if (role === 'assistant') {
+    bub.innerHTML = linkify(content);
+  } else {
+    bub.textContent = content;
+  }
   if (showCalendly) {
     const btn = document.createElement('a');
-    btn.href = CALENDLY;
+    btn.href = CALENDLY_DOMNA;
     btn.target = '_blank';
     btn.className = 'calendly-btn';
     btn.textContent = 'Book a time with our team';
@@ -493,12 +538,10 @@ async function sendMessage(text) {
     removeTyping();
 
     if (data.error) {
-      const msg = JSON.stringify(data.error);
-      console.error('API error details:', msg);
-      if (msg.includes('overloaded')) {
+      const errMsg = JSON.stringify(data.error);
+      console.error('API error:', errMsg);
+      if (errMsg.includes('overloaded')) {
         addMessage('assistant', "We are a little backed up right now. Give it a minute and try again, I will be right here.");
-      } else if (msg.includes('too long') || msg.includes('token')) {
-        addMessage('assistant', "Something went wrong on my end. Try sending a shorter message.");
       } else {
         addMessage('assistant', "Something came up on my end. Try sending that again in a second.");
       }
@@ -511,20 +554,30 @@ async function sendMessage(text) {
       if (block && block.text) reply = block.text;
     }
 
-    // Handle silent profile save
+    // Handle profile save
     if (reply.includes('SAVE_PROFILE:') && !profileSaved) {
       const match = reply.match(/SAVE_PROFILE:([^:\n]+):([^\n]+)/);
       if (match) {
         profileSaved = true;
-        saveProfile({
-          Code: match[1].trim().toUpperCase() + Date.now().toString().slice(-4),
-          FirstName: match[1].trim(),
-          LastSummary: match[2].trim(),
-          LastActive: new Date().toISOString().split('T')[0]
-        });
+        fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            saveProfile: {
+              Code: match[1].trim().toUpperCase() + Date.now().toString().slice(-4),
+              FirstName: match[1].trim(),
+              LastSummary: match[2].trim(),
+              LastActive: new Date().toISOString().split('T')[0]
+            }
+          })
+        }).catch(() => {});
       }
       reply = reply.replace(/\nSAVE_PROFILE:[^\n]*/g, '').trim();
     }
+
+    const crisisDetected = reply.includes('988') || reply.includes('Crisis Text Line');
+    const showCalendly = reply.includes('SHOW_CALENDLY');
+    reply = reply.replace(/\nSHOW_CALENDLY/g, '').replace('SHOW_CALENDLY', '').trim();
 
     // Crisis incident flagging
     if (crisisDetected) {
@@ -533,33 +586,21 @@ async function sendMessage(text) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           subject: 'URGENT — Crisis Disclosure on Greenwich Connects',
-          message: `A crisis disclosure was detected on the Greenwich Connects agent.\n\nDate: ${new Date().toLocaleDateString()}\nTime: ${new Date().toLocaleTimeString()}\nSession ID: ${sessionId}\n\nThe agent detected crisis language and immediately routed to 988, Crisis Text Line, and Kids in Crisis.\n\nIf this person reaches out through Talk to us please prioritize their response.\n\nLook up Session ID ${sessionId} in Airtable for conversation context.`,
+          message: `A crisis disclosure was detected.\n\nDate: ${new Date().toLocaleDateString()}\nTime: ${new Date().toLocaleTimeString()}\nSession ID: ${sessionId}\n\nThe agent routed to 988, Crisis Text Line, and Kids in Crisis.\n\nLook up Session ID ${sessionId} in Airtable for context.`,
           source: 'Crisis Alert'
         })
       }).catch(() => {});
     }
-    reply = reply.replace(/\nSHOW_CALENDLY/g, '').replace('SHOW_CALENDLY', '').trim();
-
-  // Remove old beforeunload if exists
-  // Show "Send me my plan" in input area after 4+ messages
-  if (history.filter(m => m.role === 'user').length === 4 && !document.getElementById('plan-prompt')) {
-    const inputArea = document.querySelector('.input-area');
-    const planWrap = document.createElement('div');
-    planWrap.id = 'plan-prompt';
-    planWrap.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px 14px;background:#f0faf4;border-top:1px solid #e8f5e9;';
-    planWrap.innerHTML = `
-      <input id="plan-contact" placeholder="Email or phone for your next steps" style="flex:1;border:1.5px solid #b7e4c7;border-radius:18px;padding:8px 14px;font-size:13px;outline:none;font-family:inherit;background:#fff;">
-      <button onclick="sendPlan()" style="background:#fff;color:#1b4332;border:2px solid #1b4332;border-radius:18px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;">Send me my plan</button>
-    `;
-    inputArea.parentNode.insertBefore(planWrap, inputArea);
-  }
 
     addMessage('assistant', reply, showCalendly);
     history.push({ role: 'assistant', content: reply });
 
   } catch (err) {
     removeTyping();
+    console.error('Fetch error:', err);
     addMessage('assistant', "Something came up on my end. Try sending that again in a second.");
+  } finally {
+    document.getElementById('sendBtn').disabled = false;
   }
 }
 
@@ -571,34 +612,6 @@ function autoResize(el) {
   el.style.height = 'auto';
   el.style.height = el.scrollHeight + 'px';
   document.getElementById('sendBtn').disabled = !el.value.trim();
-}
-
-async function sendPlan() {
-  const contact = document.getElementById('plan-contact')?.value.trim();
-  if (!contact) return;
-
-  const userMessages = history.filter(m => m.role === 'user').map(m => m.content).join(', ');
-  const resources = history.filter(m => m.role === 'assistant')
-    .map(m => m.content)
-    .sort((a, b) => b.length - a.length)[0] || '';
-
-  document.getElementById('plan-prompt')?.remove();
-
-  try {
-    await fetch(FORMSPREE, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contact,
-        subject: 'Your next steps from Greenwich Connects',
-        message: `Hi! Here is a summary from your Greenwich Connects conversation.\n\nWhat you came in for: ${userMessages}\n\nResources and next steps:\n${resources}\n\nQuestions? Visit greenwichconnects.vercel.app or tap Talk to us to book time with our team.`,
-        source: 'Next Steps Export'
-      })
-    });
-    addMessage('assistant', `Done! We sent your next steps to ${contact}. You can always come back here if you need anything else.`);
-  } catch {
-    addMessage('assistant', "Something went wrong sending that. Try again in a second.");
-  }
 }
 
 function toggleCats() { document.getElementById('cats').classList.toggle('open'); }
@@ -622,7 +635,7 @@ async function submitHandoff() {
     await fetch(FORMSPREE, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, contact, topic, source: 'Greenwich Connects Agent' })
+      body: JSON.stringify({ name, contact, topic, sessionId, source: 'Greenwich Connects Agent' })
     });
   } catch {}
   addMessage('assistant', `We have got your info ${name}. Someone from the Greenwich Connects team will reach out at ${contact} soon. You took a real step just by reaching out.`);
@@ -633,14 +646,11 @@ window.onload = () => {
   addMessage('assistant', welcome);
   history.push({ role: 'assistant', content: welcome });
 
-  // Log full conversation when user leaves
+  // Log conversation when user leaves
   window.addEventListener('pagehide', () => {
     if (history.filter(m => m.role === 'user').length === 0) return;
-
     const userMessages = history.filter(m => m.role === 'user').map(m => m.content).join(' ');
     const allReplies = history.filter(m => m.role === 'assistant').map(m => m.content).join(' ');
-    const lastReply = history.filter(m => m.role === 'assistant').slice(-1)[0]?.content || '';
-
     const topics = [];
     if (userMessages.match(/job|resume|work|career|employ/i)) topics.push('Career');
     if (userMessages.match(/license|permit|driving|driver/i)) topics.push('Driving');
@@ -652,12 +662,7 @@ window.onload = () => {
     if (userMessages.match(/legal|immigr|visa|citizen/i)) topics.push('Legal');
     if (userMessages.match(/meet|people|friends|social/i)) topics.push('Social');
     if (topics.length === 0) topics.push('General');
-
-    // Find most useful reply — longest one is usually most resource-rich
-    const mostUsefulReply = history
-      .filter(m => m.role === 'assistant')
-      .sort((a, b) => b.content.length - a.content.length)[0]?.content || '';
-
+    const mostUsefulReply = history.filter(m => m.role === 'assistant').sort((a, b) => b.content.length - a.content.length)[0]?.content || '';
     const data = JSON.stringify({
       logConversation: {
         SessionId: sessionId,
@@ -667,12 +672,11 @@ window.onload = () => {
         Outcome: mostUsefulReply.slice(0, 200),
         CrisisTriggered: allReplies.includes('988'),
         MentorOffered: allReplies.includes('Domna') || allReplies.includes('Etana'),
-        CalendlyShown: allReplies.includes('SHOW_CALENDLY') || allReplies.includes('Book a time'),
+        CalendlyShown: allReplies.includes('Book a time') || allReplies.includes('calendly'),
         Language: 'English',
         MessageCount: history.filter(m => m.role === 'user').length
       }
     });
-
     navigator.sendBeacon('/api/chat', new Blob([data], { type: 'application/json' }));
   });
 };
